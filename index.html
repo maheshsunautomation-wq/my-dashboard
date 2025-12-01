@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Winterland Neon Login</title>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at center, #000428, #004e92);
+    color: white;
+    position: relative;
+  }
+
+  .notification {
+    position: fixed;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff4c4c;
+    color: #fff;
+    padding: 15px 30px;
+    border-radius: 5px;
+    font-weight: bold;
+    box-shadow: 0 0 15px #ff4c4c;
+    transition: top 0.5s ease;
+    z-index: 100;
+  }
+
+  .snow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-image: 
+      url('https://cdn.pixabay.com/photo/2013/07/12/13/21/snowflake-147307_1280.png'),
+      url('https://cdn.pixabay.com/photo/2013/07/12/13/21/snowflake-147307_1280.png');
+    background-size: 70px, 50px;
+    animation: snow 12s linear infinite;
+    opacity: 0.6;
+  }
+
+  @keyframes snow {
+    0% { background-position: 0 0, 0 0; }
+    100% { background-position: 400px 800px, 200px 400px; }
+  }
+
+  .login-box {
+    position: relative;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    width: 320px;
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+  }
+
+  .login-box h2 {
+    margin-bottom: 25px;
+    color: #fff;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+  }
+
+  .login-box input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.85);
+    outline: none;
+  }
+
+  .neon-btn {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    padding: 12px 0;
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #00f0ff;
+    text-transform: uppercase;
+    border: 2px solid #00f0ff;
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    letter-spacing: 2px;
+    box-shadow: 0 0 10px #00f0ff, inset 0 0 10px #00f0ff;
+    transition: all 0.3s ease;
+    animation: neonPulse 2s infinite alternate;
+  }
+
+  @keyframes neonPulse {
+    from { box-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff; }
+    to { box-shadow: 0 0 20px #00f0ff, 0 0 40px #00f0ff; }
+  }
+
+  .neon-btn:hover {
+    color: #000;
+    background: #00f0ff;
+    box-shadow: 0 0 20px #00f0ff, 0 0 60px #00f0ff, 0 0 100px #00f0ff;
+    transform: translateY(-3px);
+  }
+
+  .snowflake {
+    position: absolute;
+    top: -10px;
+    color: #00f0ff;
+    font-size: 2em;
+    opacity: 0.9;
+    text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+    animation: fall linear infinite;
+  }
+
+  @keyframes fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="notification" id="notif">Wrong username or password!</div>
+
+<div class="snow"></div>
+
+<div class="login-box">
+  <h2>❄️ Neon Winter Login ❄️</h2>
+  <input type="text" id="username" placeholder="Enter Name">
+  <input type="password" id="password" placeholder="Enter Password">
+  <button class="neon-btn" id="loginBtn">Login</button>
+</div>
+
+<script>
+  function createSnowflake() {
+    const snowflake = document.createElement('div');
+    snowflake.classList.add('snowflake');
+    snowflake.textContent = '❄';
+    snowflake.style.left = Math.random() * window.innerWidth + 'px';
+    snowflake.style.animationDuration = (Math.random() * 3 + 3) + 's';
+    document.body.appendChild(snowflake);
+    setTimeout(() => snowflake.remove(), 6000);
+  }
+  setInterval(createSnowflake, 250);
+
+  // 🔐 Login button click
+  document.getElementById('loginBtn').addEventListener('click', function() {
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+    const notif = document.getElementById('notif');
+
+    if(user === "mahesh" && pass === "303") {
+      window.location.href = "dashboard.html";
+    } else {
+      notif.style.top = "20px";
+      setTimeout(() => {
+        notif.style.top = "-60px";
+      }, 2500);
+    }
+  });
+</script>
+
+</body>
+</html>

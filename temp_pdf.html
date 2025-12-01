@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Temperature PDF Auto Download</title>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      font-family: "Poppins", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h2 {
+      font-size: 22px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📄 Generating Temperature PDF...</h2>
+  <p>Please wait, your download will start automatically.</p>
+
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    // Convert ISO to DD/MM/YYYY
+    function formatDate(iso) {
+      const d = new Date(iso);
+      return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+    }
+
+    // Convert ISO to HH:MM:SS
+    function formatTime(iso) {
+      const d = new Date(iso);
+      return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}:${String(d.getSeconds()).padStart(2,"0")}`;
+    }
+
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+
+      const url = "https://script.google.com/macros/s/AKfycbyJlIqmcF98cxoQ_2d0DAHmQVQYFjvsEl9fwB3sFJZ-vzJ_QJCwiqzf2aZcmW5mcgdn/exec";
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        let headers = data[0];
+        let rows = data.slice(1);
+
+        rows = rows.map(row => [
+          formatDate(row[0]),
+          formatTime(row[1]),
+          row[2],
+          row[3],
+          row[4],
+          row[5]
+        ]);
+
+        const doc = new jsPDF();
+        doc.text("Temperature Report", 14, 15);
+
+        doc.autoTable({
+          head: [headers],
+          body: rows,
+          startY: 20,
+          theme: "grid"
+        });
+
+        doc.save("temperature_report.pdf");
+
+      } catch (error) {
+        alert("Error fetching data!");
+        console.error(error);
+      }
+    }
+
+    // 🔥 AUTO DOWNLOAD ON PAGE LOAD
+    window.onload = generatePDF;
+  </script>
+
+</body>
+</html>

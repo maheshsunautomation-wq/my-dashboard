@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sensor Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+<style>
+body {
+  background:#000; color:#fff; font-family:Arial,sans-serif;
+  text-align:center; padding:20px; display:flex; flex-direction:column; align-items:center;
+  transition:0.5s ease;
+}
+h2{color:#fff;}
+canvas{background:#111; border-radius:10px; width:800px; max-width:95%;}
+
+/* Sensor controls */
+.controls{margin-top:15px;}
+.sensor-option{
+  display:inline-flex; align-items:center; margin:8px;
+  background:#111; padding:8px 15px; border-radius:10px; border:1px solid #444;
+  transition:0.3s ease;
+}
+.sensor-option:hover{transform:scale(1.03);}
+.sensor-option input[type="color"]{margin-left:8px; width:35px; height:25px;}
+
+/* Layout */
+#statusContainer{
+  display:flex; gap:20px; margin-top:20px;
+  width:100%; justify-content:center;
+}
+
+#statusPanel{
+  display:flex; flex-direction:column; gap:15px;
+  min-width:250px;
+  background:#111; padding:15px; border-radius:10px; border:1px solid #333;
+}
+
+/* Emergency blink ONLY (Normal NO blink) */
+@keyframes blinkRed {
+  0% { box-shadow:0 0 8px #ff0000; }
+  50% { box-shadow:0 0 25px #ff0000; }
+  100% { box-shadow:0 0 8px #ff0000; }
+}
+
+.status-item{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 12px; border-radius:8px; font-weight:bold;
+  transition:0.5s ease;
+}
+
+.status-item.normal{
+  background-color:#003300; color:#00ff00; border:2px solid #00ff00;
+}
+
+.status-item.emergency{
+  background-color:#330000; color:#ff4444; border:2px solid #ff4444;
+  animation: blinkRed 1s infinite;
+}
+
+/* Threshold Box */
+#thresholdBox{
+  background:#111; padding:15px; border-radius:10px; border:1px solid #333;
+  min-width:250px; color:white;
+}
+#thresholdBox div{
+  display:flex; justify-content:space-between; margin:10px 0;
+  font-size:16px; font-weight:bold;
+}
+#thresholdBox input{
+  width:100px; background:#222; color:white; padding:5px;
+  border:1px solid #666; border-radius:6px; font-size:15px;
+}
+
+/* SAVE button */
+#saveBtn {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: #00aaff;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: 0.3s ease;
+}
+#saveBtn:hover {
+  transform: scale(1.05);
+  background: #0088cc;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🌡️ Sensor Data Monitoring</h2>
+
+<div class="controls" id="sensorControls"></div>
+<canvas id="sensorChart"></canvas>
+
+<!-- Layout -->
+<div id="statusContainer">
+    <div id="statusPanel"></div>
+    <div id="thresholdBox"><h3>Edit Threshold Values</h3></div>
+</div>
+
+<script src="trigger_call_if_emergency.js"></script>
+
+<script>
+const apiURL =
+"https://script.google.com/macros/s/AKfycbxuaPGKCSyKQhO2TqthE7wEdKx2xGQLRqY4obpMOGNyhfg08S80FGzgILvvRN5qibGJ4g/exec";
+
+const sensors = ["GAS","SMOKE","SOUND","LDR","IR"];
+const colors = ["#ff4d4d","#ffa64d","#4dff4d","#4da6ff","#b84dff"];
+
+/* Default thresholds (if no saved data) */
+let thresholds = {
+  GAS:700, SMOKE:4500, SOUND:3400, LDR:3500, IR:3500
+};
+
+/* Load saved thresholds from localStorage */
+function loadSavedThresholds() {
+  const saved = localStorage.getItem("sensorThresholds");
+  if (saved) thresholds = JSON.parse(saved);
+}
+
+loadSavedThresholds();
+
+let parsedData = [];
+let chart = null;
+
+/* DATE FIX */
+function extractDate(dateStr){
+  let d = new Date(dateStr.split(" ")[0]);
+  if(isNaN(d)) d = new Date(dateStr.replace(/-/g,"/"));
+  return d;
+}
+
+/* MAIN FETCH FUNCTION */
+function loadData() {
+fetch(apiURL)
+.then(res => res.json())
+.then(sheet => {
+
+    parsedData = sheet.map(r => ({
+      date: extractDate(r.DATE),
+      values: sensors.map(s => Number(r[s]))
+    }));
+
+    parsedData.sort((a,b) => a.date - b.date);
+
+    const labels = parsedData.map(d =>
+      `${String(d.date.getDate()).padStart(2,"0")}-${String(d.date.getMonth()+1).padStart(2,"0")}-${d.date.getFullYear()}`
+    );
+
+    const datasets = sensors.map((sensor,i) => ({
+      label: sensor,
+      data: parsedData.map(d => d.values[i]),
+      backgroundColor: colors[i],
+      borderRadius: 5
+    }));
+
+    if(chart){
+      chart.data.labels = labels;
+      chart.data.datasets.forEach((ds,i)=>{
+        ds.data = datasets[i].data;
+      });
+      chart.update();
+
+    } else {
+      const ctx = document.getElementById("sensorChart").getContext("2d");
+      chart = new Chart(ctx, {
+        type:"bar",
+        data:{labels,datasets},
+        options:{
+          responsive:true,
+          animation:{duration:800},
+          plugins:{
+            datalabels:{color:"#fff",anchor:"end",align:"top"},
+            legend:{labels:{color:"white"}},
+            title:{display:true,text:"Sensor Readings Over Time",color:"white"}
+          },
+          scales:{
+            x:{ticks:{color:"#fff"},grid:{color:"#333"}},
+            y:{beginAtZero:true,ticks:{color:"#fff"},grid:{color:"#333"}}
+          }
+        },
+        plugins:[ChartDataLabels]
+      });
+    }
+
+    refreshStatus();
+});
+}
+
+/* STATUS REFRESH */
+function refreshStatus(){
+  const statusPanel = document.getElementById("statusPanel");
+  statusPanel.innerHTML="";
+
+  sensors.forEach((sensor,i)=>{
+    const maxValue = Math.max(...parsedData.map(d => d.values[i]));
+    const div=document.createElement("div");
+    div.className="status-item";
+
+    const label=document.createElement("span");
+    label.textContent=sensor + ": ";
+
+    const state=document.createElement("span");
+
+    if(maxValue > thresholds[sensor]){
+      div.classList.add("emergency");
+      state.textContent="🚨 EMERGENCY";
+    } else {
+      div.classList.add("normal");
+      state.textContent="✅ NORMAL";
+    }
+
+    div.appendChild(label);
+    div.appendChild(state);
+    statusPanel.appendChild(div);
+  });
+
+  checkEmergencyAndCall(parsedData, sensors, thresholds);
+}
+
+/* Sensor controls */
+const controlsDiv = document.getElementById("sensorControls");
+sensors.forEach((sensor,index)=>{
+  const div=document.createElement("div");
+  div.className="sensor-option";
+
+  const checkbox=document.createElement("input");
+  checkbox.type="checkbox"; checkbox.checked=true;
+
+  checkbox.addEventListener("change",()=>{
+    chart.data.datasets[index].hidden = !checkbox.checked;
+    chart.update();
+  });
+
+  const label=document.createElement("label");
+  label.textContent=sensor;
+
+  const colorPicker=document.createElement("input");
+  colorPicker.type="color"; colorPicker.value=colors[index];
+
+  colorPicker.addEventListener("input",()=>{
+    chart.data.datasets[index].backgroundColor = colorPicker.value;
+    chart.update();
+  });
+
+  div.appendChild(checkbox);
+  div.appendChild(label);
+  div.appendChild(colorPicker);
+  controlsDiv.appendChild(div);
+});
+
+/* Threshold box */
+const thresholdBox = document.getElementById("thresholdBox");
+Object.keys(thresholds).forEach(sensor=>{
+  const row=document.createElement("div");
+
+  const label=document.createElement("span");
+  label.textContent=sensor;
+
+  const input=document.createElement("input");
+  input.type="number";
+  input.value=thresholds[sensor];
+
+  input.addEventListener("input",()=>{
+    thresholds[sensor] = Number(input.value);
+  });
+
+  row.appendChild(label);
+  row.appendChild(input);
+  thresholdBox.appendChild(row);
+});
+
+/* SAVE BUTTON */
+const saveButton = document.createElement("button");
+saveButton.id = "saveBtn";
+saveButton.textContent = "SAVE THRESHOLDS";
+saveButton.onclick = function() {
+  localStorage.setItem("sensorThresholds", JSON.stringify(thresholds));
+  alert("✅ Threshold values saved permanently!");
+};
+thresholdBox.appendChild(saveButton);
+
+/* LOAD FIRST TIME */
+loadData();
+
+/* Auto refresh every 5 sec */
+setInterval(() => { loadData(); }, 5000);
+</script>
+
+</body>
+</html>

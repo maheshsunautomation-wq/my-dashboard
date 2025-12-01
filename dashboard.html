@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard 3x3 Buttons</title>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+body {
+    margin:0;
+    padding:0;
+    background:#0d1117;
+    font-family:Arial,sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    color:#fff;
+    position:relative;
+}
+.toggle-btn {
+    position:absolute;
+    top:20px;
+    right:20px;
+    padding:15px 35px;
+    font-size:18px;
+    font-weight:bold;
+    border:none;
+    border-radius:50px;
+    cursor:pointer;
+    color:#fff;
+    background:linear-gradient(135deg,#28a745,#218838);
+    box-shadow:0 4px 15px rgba(0,0,0,0.3);
+    transition:all 0.3s ease;
+}
+.toggle-btn.disabled {
+    background:linear-gradient(135deg,#dc3545,#b02a37);
+}
+.toggle-btn:hover {
+    transform:scale(1.05);
+    box-shadow:0 6px 20px rgba(0,0,0,0.5);
+}
+.grid {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(250px,300px));
+    grid-auto-rows:150px;
+    gap:30px;
+    justify-content:center;
+    align-content:center;
+}
+.btn {
+    border-radius:20px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:22px;
+    font-weight:bold;
+    cursor:pointer;
+    text-decoration:none;
+    color:#000;
+    text-align:center;
+    padding:25px 40px;
+    transition:all 0.3s ease;
+}
+.grid a:nth-child(1) {background:#ff6b6b;} /* COW PDF */
+.grid a:nth-child(2) {background:#54a0ff;}
+.grid a:nth-child(3) {background:#f368e0;}
+.grid a:nth-child(4) {background:#1dd1a1;}
+.grid a:nth-child(5) {background:#ff9f43;}
+.grid a:nth-child(6) {background:#a29bfe;}
+.grid a:nth-child(7) {background:#ff4757;}
+.grid a:nth-child(8) {background:#00d2d3;}
+.grid a:nth-child(9) {background:#ffa502;}
+.grid a:hover {opacity:0.9;}
+</style>
+</head>
+<body>
+
+<!-- Default state: NO ACTIVE CALL -->
+<button id="toggleBtn" class="toggle-btn disabled">NO ACTIVE CALL</button>
+
+<div class="grid">
+  <a class="btn" id="cowPdfBtn" href="#">COW PDF</a>
+  <a class="btn" href="temp_pdf.html" target="_blank">TEMP PDF</a>
+  <a class="btn" href="#">GAS PDF</a>
+  <a class="btn" href="#">SCHEDULE</a>
+  <a class="btn" id="sensorChartBtn" href="#" target="_blank">SENSOR CHART</a>
+  <a class="btn" href="#">TEMP CHART</a>
+  <a class="btn" href="ANNA.html" target="_blank">COW CHART</a>
+  <a class="btn" href="#">MONTHLY WATER USAGE</a>
+  <a class="btn" href="#">CAMERA</a>
+</div>
+
+<!-- Include cow PDF JS -->
+<script src="cow_pdf.js"></script>
+
+<script>
+const toggleBtn = document.getElementById('toggleBtn');
+toggleBtn.addEventListener('click', () => {
+  if(toggleBtn.classList.contains('disabled')){
+    toggleBtn.classList.remove('disabled');
+    toggleBtn.textContent = 'ACTIVE CALL';
+  } else {
+    toggleBtn.classList.add('disabled');
+    toggleBtn.textContent = 'NO ACTIVE CALL';
+  }
+});
+
+// Dashboard button triggers cow PDF
+const cowPdfBtn = document.getElementById('cowPdfBtn');
+cowPdfBtn.addEventListener('click', (e)=>{
+  e.preventDefault(); // prevent navigation
+  downloadCowPDF();   // start PDF download
+});
+
+// Open sensor chart with active call state
+const sensorChartBtn = document.getElementById("sensorChartBtn");
+sensorChartBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    const activeCall = toggleBtn.classList.contains('disabled') ? 0 : 1; // 1 = Active Call
+    const url = `sensor_chart.html?activeCall=${activeCall}`;
+    window.open(url, '_blank');
+});
+</script>
+
+</body>
+</html>
