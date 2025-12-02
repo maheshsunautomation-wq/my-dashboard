@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensor Data PDF Auto Download</title>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      font-family: "Poppins", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h2 { font-size: 22px; }
+  </style>
+</head>
+<body>
+
+  <h2>📄 Generating Sensor PDF...</h2>
+  <p>Please wait, your download will start automatically.</p>
+
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+
+    // FIX: Convert UTC → IST (India Time)
+    function onlyDate(iso) {
+      const d = new Date(iso);
+      d.setHours(d.getHours() + 5, d.getMinutes() + 30); // add IST offset
+      return d.toISOString().split("T")[0];  // return YYYY-MM-DD
+    }
+
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+
+      const url = "https://script.google.com/macros/s/AKfycbxuaPGKCSyKQhO2TqthE7wEdKx2xGQLRqY4obpMOGNyhfg08S80FGzgILvvRN5qibGJ4g/exec";
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        console.log("RAW:", data);
+
+        const headers = ["DATE", "GAS", "SMOKE", "SOUND", "LDR", "IR"];
+        let rows = [];
+
+        if (Array.isArray(data[0])) {
+          rows = data.map(r => [
+            onlyDate(r[0]),   // <<<<<< FIXED DATE
+            r[1], r[2], r[3], r[4], r[5]
+          ]);
+        } else {
+          rows = data.map(r => [
+            onlyDate(r.DATE),
+            r.GAS, r.SMOKE, r.SOUND, r.LDR, r.IR
+          ]);
+        }
+
+        const doc = new jsPDF();
+        doc.text("Sensor Report", 14, 15);
+
+        doc.autoTable({
+          head: [headers],
+          body: rows,
+          startY: 20,
+          theme: "grid"
+        });
+
+        doc.save("sensor_report.pdf");
+
+      } catch (error) {
+        console.error(error);
+        alert("ERROR fetching data!");
+      }
+    }
+
+    window.onload = generatePDF;
+  </script>
+
+</body>
+</html>
