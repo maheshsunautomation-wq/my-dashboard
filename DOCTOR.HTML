@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cow Task History</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    font-family: 'Roboto', sans-serif;
+
+    /* ⭐ Your Image Background */
+    background: url('hi.png') no-repeat center center fixed;
+    background-size: cover;
+
+    color: #fff;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Dark Glass Background for Title */
+  h1 {
+    text-align:center;
+    margin:40px 0 20px 0;
+    font-weight:700;
+    font-size:36px;
+    text-shadow:0 0 12px rgba(0, 150, 255, 0.8);
+    background: rgba(0,0,0,0.35);
+    padding: 10px 0;
+    border-radius: 12px;
+    width: 90%;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  /* Add Task Button container */
+  #add-task-container {
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:20px;
+    flex-wrap:wrap;
+    margin-bottom:40px;
+  }
+
+  /* Add Button */
+  #add-task-btn {
+    font-size:32px;
+    background:linear-gradient(145deg, #7f00ff, #4b00c9);
+    color:#fff;
+    border:none;
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    cursor:pointer;
+    box-shadow:0 0 20px rgba(120,0,255,0.6);
+    transition:transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  #add-task-btn:hover {
+    transform: scale(1.15);
+    box-shadow:0 0 30px rgba(0,150,255,0.9);
+  }
+
+  /* Form Box—matched with image purple/blue tone */
+  #task-form {
+    display:none;
+    background:rgba(20, 0, 50, 0.55);
+    backdrop-filter:blur(18px);
+    color:#fff;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 0 25px rgba(0,150,255,0.45);
+    max-width:350px;
+    flex-grow:1;
+    border:1px solid rgba(120,0,255,0.4);
+  }
+
+  #task-form input, #task-form select, #task-form textarea, #task-form button {
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border-radius:12px;
+    border:none;
+    font-size:16px;
+    box-sizing:border-box;
+    background:rgba(255,255,255,0.18);
+    color:#fff;
+    backdrop-filter:blur(10px);
+    outline:none;
+  }
+
+  #task-form textarea { height:80px; resize:none; }
+  #task-form input::placeholder, #task-form textarea::placeholder { color:#eee; }
+
+  #task-form button {
+    background:linear-gradient(145deg, #00a8ff, #006eff);
+    font-weight:600;
+    color:#fff;
+    box-shadow:0 0 12px rgba(0,150,255,0.8);
+  }
+
+  #task-form button:hover {
+    transform:translateY(-2px);
+    box-shadow:0 0 18px rgba(0,150,255,1);
+  }
+
+  /* Table — Glow Blue & Purple */
+  table {
+    width:95%;
+    margin:0 auto 40px auto;
+    border-collapse:collapse;
+    background:rgba(10, 0, 35, 0.55);
+    backdrop-filter:blur(20px);
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 0 40px rgba(0,150,255,0.4);
+    border:1px solid rgba(120,0,255,0.3);
+  }
+
+  th, td {
+    padding:15px 20px;
+    text-align:center;
+    border-bottom:1px solid rgba(255,255,255,0.15);
+    font-weight:500;
+  }
+
+  th {
+    background:rgba(120,0,255,0.25);
+    text-shadow:0 0 8px rgba(0,150,255,0.8);
+  }
+
+  .delete-btn {
+    background:#ff2f4b;
+    color:#fff;
+    border:none;
+    padding:8px 12px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:600;
+    box-shadow:0 0 10px rgba(255,0,80,0.6);
+  }
+
+  .delete-btn:hover {
+    background:#c80036;
+    transform:translateY(-1px);
+  }
+</style>
+</head>
+
+<body>
+
+<h1>DOCTOR DETAILS HISTORY</h1>
+
+<div id="add-task-container">
+  <button id="add-task-btn" onclick="toggleForm()">+</button>
+
+  <div id="task-form">
+    <input type="text" id="task-name" placeholder="First Name">
+    <input type="text" id="task-cowid" placeholder="Cow ID">
+    <input type="date" id="task-date">
+    <input type="time" id="task-time">
+
+    <select id="am-pm">
+      <option value="AM">AM</option>
+      <option value="PM">PM</option>
+    </select>
+
+    <input type="text" id="task-medicine" placeholder="Medicine">
+    <textarea id="task-reason" placeholder="Reason"></textarea>
+
+    <button onclick="addTask()">Submit</button>
+  </div>
+</div>
+
+
+<table id="tasks-list">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Cow ID</th>
+      <th>Date</th>
+      <th>Time</th>
+      <th>AM/PM</th>
+      <th>Medicine</th>
+      <th>Reason</th>
+      <th>Delete</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbxpLXJG9b1gMR14-44wj5k2wtMqc9w_9YKWAvybaq7EuyqQWYZPeuQrb5SSU3opUp4G/exec";
+
+function toggleForm() {
+  const form = document.getElementById('task-form');
+  form.style.display = form.style.display === 'block' ? 'none' : 'block';
+}
+
+function addTask(){
+  const name = document.getElementById('task-name').value.trim();
+  const cowId = document.getElementById('task-cowid').value.trim();
+  const date = document.getElementById('task-date').value;
+  const time = document.getElementById('task-time').value;
+  const ampm = document.getElementById('am-pm').value;
+  const medicine = document.getElementById('task-medicine').value.trim();
+  const reason = document.getElementById('task-reason').value.trim();
+
+  if(!name || !cowId || !date || !time || !medicine || !reason){
+    alert('Please fill all fields');
+    return;
+  }
+
+  fetch(scriptURL, {
+    method:'POST',
+    body: JSON.stringify({name,cowId,date,time,ampm,medicine,reason})
+  })
+  .then(res => res.text())
+  .then(res=>{
+    alert('Task details stored successfully');
+    document.getElementById('task-form').style.display='none';
+    loadTasks();
+  });
+}
+
+function formatDate(d) {
+  if (!d) return "";
+  const date = new Date(d);
+  return String(date.getDate()).padStart(2,'0') + "." +
+         String(date.getMonth()+1).padStart(2,'0') + "." +
+         date.getFullYear();
+}
+
+function formatTime(t) {
+  if (!t) return "";
+  const tm = new Date(t);
+  if (isNaN(tm.getTime())) return t;
+  return String(tm.getHours()).padStart(2, '0') + ":" +
+         String(tm.getMinutes()).padStart(2, '0');
+}
+
+function loadTasks(){
+  fetch(scriptURL+"?action=get")
+  .then(res=>res.json())
+  .then(data=>{
+    const tbody=document.querySelector('#tasks-list tbody');
+    tbody.innerHTML='';
+
+    data.forEach(row=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td>${row.name}</td>
+        <td>${row.cowId}</td>
+        <td>${formatDate(row.date)}</td>
+        <td>${formatTime(row.time)}</td>
+        <td>${row.ampm}</td>
+        <td>${row.medicine}</td>
+        <td>${row.reason}</td>
+        <td><button class="delete-btn" onclick="deleteTask('${row.id}')">Delete</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+function deleteTask(id){
+  fetch(scriptURL+"?action=delete&id="+id)
+  .then(res=>res.text())
+  .then(res=>{
+    alert('Task deleted successfully');
+    loadTasks();
+  });
+}
+
+window.onload = loadTasks;
+</script>
+
+</body>
+</html>
