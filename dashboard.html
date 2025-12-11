@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Dashboard 3x3 Buttons</title>
+<title>Premium Dashboard - Multi-Color Particle Glow</title>
 
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -13,18 +13,46 @@
 body {
     margin:0;
     padding:0;
-    background:#0d1117;
-    font-family:Arial,sans-serif;
+    min-height:100vh;
     display:flex;
-    justify-content:center;
+    flex-direction:column;
     align-items:center;
-    height:100vh;
-    color:#fff;
+    font-family:'Segoe UI',sans-serif;
     position:relative;
+    overflow-x:hidden;
+    background:#0d1117;
 }
+
+/* Particle Glow Background */
+canvas#bgCanvas {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
+}
+
+/* Centered Top Text - Luxury Gold */
+.topbar {
+    position: relative; /* changed from absolute */
+    margin-top: 40px;   /* space from top */
+    margin-bottom: 70px; /* space before grids */
+    text-align: center;
+    font-size: 60px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, #D4AF37, #FFD700, #bfa239, #FFD700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+
+/* Toggle Button */
 .toggle-btn {
     position:absolute;
-    top:20px;
+    top:90px;
     right:20px;
     padding:15px 35px;
     font-size:18px;
@@ -33,56 +61,114 @@ body {
     border-radius:50px;
     cursor:pointer;
     color:#fff;
-    background:linear-gradient(135deg,#28a745,#218838);
+    background:linear-gradient(135deg,#28a745,#1e8e3e);
     box-shadow:0 4px 15px rgba(0,0,0,0.3);
-    transition:all 0.3s ease;
+    transition:0.3s;
 }
 .toggle-btn.disabled {
-    background:linear-gradient(135deg,#dc3545,#b02a37);
+    background:linear-gradient(135deg,#c92a2a,#7d1b1b);
 }
-.toggle-btn:hover {
-    transform:scale(1.05);
-    box-shadow:0 6px 20px rgba(0,0,0,0.5);
-}
+.toggle-btn:hover { transform:scale(1.07); }
+
+/* Grid Layout */
 .grid {
     display:grid;
-    grid-template-columns:repeat(3,minmax(250px,300px));
+    grid-template-columns:repeat(3,260px);
     grid-auto-rows:150px;
     gap:30px;
-    justify-content:center;
-    align-content:center;
+    z-index:10;
+    justify-content: center; /* center the grid horizontally */
 }
+
+/* Extra Grid Layout */
+.extra-grid {
+    margin-top:30px; /* spacing from previous grid */
+    display:grid;
+    grid-template-columns:repeat(3,260px);
+    grid-auto-rows:150px;
+    gap:30px;
+    z-index:10;
+    justify-content: center; /* center the grid horizontally */
+}
+
+/* Premium Buttons */
 .btn {
-    border-radius:20px;
     display:flex;
     justify-content:center;
     align-items:center;
+    text-decoration:none;
     font-size:22px;
     font-weight:bold;
-    cursor:pointer;
-    text-decoration:none;
-    color:#000;
-    text-align:center;
-    padding:25px 40px;
-    transition:all 0.3s ease;
+    color: #fff;
+    border-radius:20px;
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(145deg,#1e2a38,#111820);
+    box-shadow:6px 6px 16px #0a0f14,-6px -6px 16px #2a3c4e;
+    transition:0.3s;
 }
-.grid a:nth-child(1) {background:#ff6b6b;} /* COW PDF */
-.grid a:nth-child(2) {background:#54a0ff;}
-.grid a:nth-child(3) {background:#f368e0;}
-.grid a:nth-child(4) {background:#1dd1a1;}
-.grid a:nth-child(5) {background:#ff9f43;}
-.grid a:nth-child(6) {background:#a29bfe;}
-.grid a:nth-child(7) {background:#ff4757;}
-.grid a:nth-child(8) {background:#00d2d3;}
-.grid a:nth-child(9) {background:#ffa502;}
-.grid a:hover {opacity:0.9;}
+.btn::before {
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:20px;
+    padding:2px;
+    background:linear-gradient(135deg,#ffd700,#ffb700);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    opacity:0;
+    transition:0.3s;
+}
+.btn::after {
+    content:"";
+    position:absolute;
+    top:0;
+    left:-120%;
+    width:60%;
+    height:100%;
+    background:linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent);
+    transform:skewX(-20deg);
+    transition:0.5s;
+}
+.btn:hover {
+    transform:translateY(-8px);
+    box-shadow:8px 8px 20px #0a0f14,-8px -8px 20px #2a3c4e;
+}
+.btn:hover::before { opacity:1; }
+.btn:hover::after { left:120%; }
+
+/* Original 3x3 Grid Button Colors */
+.grid a:nth-child(1){ background:linear-gradient(145deg,#e7424fcc,#ff7866aa);}
+.grid a:nth-child(2){ background:linear-gradient(145deg,#4facfe,#19fe00bb);}
+.grid a:nth-child(3){ background:linear-gradient(145deg,#bd4bffb9,#ed0404da);}
+.grid a:nth-child(4){ background:linear-gradient(145deg,#054119da,#f2f9389b);}
+.grid a:nth-child(5){ background:linear-gradient(145deg,#fac370b4,#fe4040ee);}
+.grid a:nth-child(6){ background:linear-gradient(145deg,#1305d9,#fbc2eb);}
+.grid a:nth-child(7){ background:linear-gradient(145deg,#ff2fc4,#830606a3);}
+.grid a:nth-child(8){ background:linear-gradient(145deg,#ff0026c4,#fff20074);}
+.grid a:nth-child(9){ background:linear-gradient(145deg,#f71e1e93,#ffd200);}
+
+/* Extra 3x2 Grid Premium Button Colors - UPDATED */
+.extra-grid a:nth-child(1) { background: linear-gradient(to right, #FF7E5F, #8c8cffad); } /* orange-pink */
+.extra-grid a:nth-child(2) { background: linear-gradient(to right, #00C6FF, #ff0037d6); } /* vibrant blue */
+.extra-grid a:nth-child(3) { background: linear-gradient(to right, #9D50BB, #4baa48); } /* purple-pink */
+.extra-grid a:nth-child(4) { background: linear-gradient(to right, #4b43e9, #f93838); } /* greenish aqua */
+.extra-grid a:nth-child(5) { background: linear-gradient(to right, #f7971e, #ff0000b4); } /* yellow-orange */
+.extra-grid a:nth-child(6) { background: linear-gradient(to right, #cb072e75, #a199ffc2); } /* pink gradient */
+
 </style>
 </head>
+
 <body>
 
-<!-- Default state: NO ACTIVE CALL -->
+<canvas id="bgCanvas"></canvas>
+
+<div class="topbar">Dashboard</div>
+
 <button id="toggleBtn" class="toggle-btn disabled">NO ACTIVE CALL</button>
 
+<!-- Main 3x3 Grid -->
 <div class="grid">
   <a class="btn" id="cowPdfBtn" href="#">COW PDF</a>
   <a class="btn" href="temp_pdf.html" target="_blank">TEMP PDF</a>
@@ -93,13 +179,22 @@ body {
   <a class="btn" href="ANNA.html" target="_blank">COW CHART</a>
   <a class="btn" href="http://192.168.43.159" target="_blank">LIVE SENSOR DATA</a>
   <a class="btn" href="http://192.168.43.143" target="_blank">CAMERA</a>
-  
 </div>
 
-<!-- Include cow PDF JS -->
+<!-- Extra 3x2 Grid -->
+<div class="grid extra-grid">
+  <a class="btn" href="https://docs.google.com/spreadsheets/d/1YXm37HkdblTZJCwvEYv27aUNV-Py_Kk5MSuFk8fYtvQ/edit?gid=0#gid=0" target="_blank">TEMP SHEET</a>
+  <a class="btn" href="https://docs.google.com/spreadsheets/d/1blZBzPwNScPcqMCDhVPmObv_d_6nlrfeAsM4lyLbiJU/edit?gid=0#gid=0" target="_blank">SENSOR SHEET</a>
+  <a class="btn" href="https://docs.google.com/spreadsheets/d/1Is_n3cbSF6geLZpVnAHwgWpFYoFYZze2pEOcDOtvW5g/edit?gid=0#gid=0" target="_blank">COW SHEET</a>
+  <a class="btn" href="https://docs.google.com/spreadsheets/d/1Q-m-pCDeCIWNwq235ONkD0vr6tqm7OSrABgPuI8ohyo/edit?gid=0#gid=0" target="_blank">SCHEDULE SHEET</a>
+  <a class="btn" href="https://docs.google.com/spreadsheets/d/148uWODaBmh1LNy6v69CaXQCTsLl9UEDSavRTWov3ap8/edit?gid=0#gid=0" target="_blank">WATER PREDICATION</a>
+  <a class="btn" href="DOCTOR.HTML" target="_blank">DOCTOR</a>
+</div>
+
 <script src="cow_pdf.js"></script>
 
 <script>
+// Toggle button
 const toggleBtn = document.getElementById('toggleBtn');
 toggleBtn.addEventListener('click', () => {
   if(toggleBtn.classList.contains('disabled')){
@@ -111,24 +206,82 @@ toggleBtn.addEventListener('click', () => {
   }
 });
 
-// Dashboard button triggers cow PDF
+// Cow PDF
 const cowPdfBtn = document.getElementById('cowPdfBtn');
 cowPdfBtn.addEventListener('click', (e)=>{
-  e.preventDefault(); // prevent navigation
-  downloadCowPDF();   // start PDF download
+  e.preventDefault();
+  downloadCowPDF();
 });
 
-// Open sensor chart with active call state
+// Sensor chart
 const sensorChartBtn = document.getElementById("sensorChartBtn");
 sensorChartBtn.addEventListener('click', (e)=>{
     e.preventDefault();
-    const activeCall = toggleBtn.classList.contains('disabled') ? 0 : 1; // 1 = Active Call
+    const activeCall = toggleBtn.classList.contains('disabled') ? 0 : 1;
     const url = `sensor_chart.html?activeCall=${activeCall}`;
     window.open(url, '_blank');
+});
+
+// Multi-Color Particle Glow Background
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+function randomColor() {
+    const colors = [
+        '255,0,0',
+        '255,165,0',
+        '255,255,0',
+        '0,255,255',
+        '0,128,255',
+        '128,0,255',
+        '255,0,255',
+        '0,255,128'
+    ];
+    return colors[Math.floor(Math.random()*colors.length)];
+}
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random()*canvas.width;
+    this.y = Math.random()*canvas.height;
+    this.size = Math.random()*3 + 1;
+    this.speedX = (Math.random()-0.5)*1;
+    this.speedY = (Math.random()-0.5)*1;
+    this.color = `rgba(${randomColor()},0.4)`;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset();
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fillStyle = this.color;
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 15;
+    ctx.fill();
+  }
+}
+
+const particles = [];
+for(let i=0;i<100;i++) particles.push(new Particle());
+
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{p.update(); p.draw();});
+  requestAnimationFrame(animate);
+}
+animate();
+
+window.addEventListener('resize', ()=>{
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 });
 </script>
 
 </body>
 </html>
-
-
