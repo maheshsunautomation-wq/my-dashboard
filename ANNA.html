@@ -2,261 +2,165 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🐄 Dynamic Cow Weight Monitoring (Up to 50 Cows)</title>
+<title>Cow Weight Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
 <style>
-  body {
-    background-color: #000;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
-  }
-  h2 { color: #fff; }
-  canvas {
-    background-color: #111;
-    border-radius: 10px;
-    width: 95%;
-    max-width: 1000px;
-    margin-top: 20px;
-  }
-  .controls {
-    margin-top: 15px;
-  }
-  .cow-option {
-    display: inline-flex;
-    align-items: center;
-    margin: 8px;
-    background: #111;
-    padding: 8px 15px;
-    border-radius: 10px;
-    border: 1px solid #444;
-  }
-  .cow-option input[type="color"] {
-    margin-left: 8px;
-    border: none;
-    width: 35px;
-    height: 25px;
-    background: none;
-  }
-  .cow-option label {
-    cursor: pointer;
-    font-weight: bold;
-  }
-  #cowCount {
-    width: 80px;
-    margin-top: 10px;
-    font-size: 16px;
-    text-align: center;
-  }
-  #generateBtn, #showAllBtn {
-    background: #008cff;
-    border: none;
-    color: white;
-    padding: 8px 15px;
-    font-size: 16px;
-    border-radius: 8px;
-    margin-left: 10px;
-    cursor: pointer;
-  }
-  #generateBtn:hover, #showAllBtn:hover {
-    background: #00bfff;
-  }
+body {
+  margin: 0;
+  background: #000;
+  font-family: 'Roboto', Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+  color: #fff;
+}
+
+h2 { font-size: 2em; margin-bottom: 20px; letter-spacing: 1px; }
+
+canvas {
+  background: linear-gradient(180deg,#0b0b0b,#000);
+  border-radius: 14px;
+  box-shadow: inset 0 0 25px rgba(255,255,255,0.05),0 0 25px rgba(0,0,0,0.9);
+  max-width: 96%; margin-bottom: 25px;
+}
+
+#colorPanel { margin-bottom:18px; display:flex; justify-content:center; flex-wrap:wrap;}
+#colorPanel label { margin:0 12px; font-weight:600; display:flex; align-items:center; gap:6px; }
+input[type=color]{width:34px;height:22px;border:none;cursor:pointer;border-radius:5px;}
+
+#statusPanel{display:flex; justify-content:center; flex-wrap:wrap; margin-top:20px;}
+.status-item{margin:10px;padding:16px 22px;border-radius:12px;font-weight:600;min-width:150px;background:#0f0f0f;border-left:5px solid #666;box-shadow:0 0 15px rgba(0,0,0,0.8);}
+.normal{border-color:#00ff5a;}
+.alert{border-color:#ff1a1a;color:#ffb3b3;box-shadow:0 0 20px rgba(255,0,0,0.8);}
+.blink{animation:neonBlink 1s infinite;}
+@keyframes neonBlink{0%{box-shadow:0 0 5px #ff0000;}50%{box-shadow:0 0 25px #ff0000;}100%{box-shadow:0 0 5px #ff0000;}}
 </style>
 </head>
 <body>
 
-<h2>🐄 Cow Weight Monitoring (Up to 50 Cows)</h2>
-
-<div>
-  <label for="cowCount">Enter number of cows (1–50): </label>
-  <input type="number" id="cowCount" min="1" max="50" value="2">
-  <button id="generateBtn">Generate</button>
-  <button id="showAllBtn">Show All Cows</button>
-</div>
-
-<div class="controls" id="cowControls"></div>
-
+<h2>🐄 Cow Weight Monitoring</h2>
+<div id="colorPanel"></div>
 <canvas id="cowChart"></canvas>
+<div id="statusPanel"></div>
 
 <script>
-const rawData = [
-  ["01/08/2025","22:34:41","Cow 1",78],
-  ["01/08/2025","22:35:06","Cow 1",1.52],
-  ["01/08/2025","23:56:37","Cow 2",55],
-  ["01/08/2025","23:57:05","Cow 1",308.09],
-  ["01/08/2025","23:57:14","Cow 1",64],
-  ["01/08/2025","23:57:23","Cow 1",110.17],
-  ["01/08/2025","23:57:40","Cow 1",58.74],
-  ["01/08/2025","23:58:06","Cow 2",108.9],
-  ["01/08/2025","23:58:37","Cow 2",24.27],
-  ["01/08/2025","23:58:51","Cow 2",0],
-  ["02/08/2025","00:01:06","Cow 2",114.34],
-  ["02/08/2025","13:15:11","Cow 1",27.24],
-  ["02/08/2025","13:15:31","Cow 1",58.08],
-  ["02/08/2025","13:15:41","Cow 1",0],
-  ["02/08/2025","13:16:06","Cow 2",0],
-  ["02/08/2025","13:16:39","Cow 1",0],
-  ["02/08/2025","13:17:00","Cow 2",0.12],
-  ["02/08/2025","14:27:16","Cow 2",0],
-  ["02/08/2025","14:27:30","Cow 1",0],
-  ["02/08/2025","14:27:43","Cow 1",2.37],
-  ["02/08/2025","14:27:59","Cow 2",0],
-  ["02/08/2025","14:28:09","Cow 1",0],
-  ["02/08/2025","14:28:19","Cow 1",61.16],
-  ["02/08/2025","14:28:36","Cow 2",0],
-  ["03/08/2025","14:29:46","Cow 1",186.9],
-  ["04/08/2025","14:29:56","Cow 2",226.51],
-  ["25/08/2025","14:30:09","Cow 2",404.27],
-  ["02/08/2025","14:30:24","Cow 2",366.19],
-  ["02/08/2025","14:42:43","Cow 1",365.43]
-];
+const apiURL = "https://script.google.com/macros/s/AKfycbxIzCALAAu3hqrsn3u9jXJCLtCWNwK8SZx6I1vLrYFw3HQpHVWGgCaT-YvH-keSsajQ/exec";
 
-// Sort data by date/time
-rawData.sort((a, b) => {
-  const dateA = new Date(a[0].split("/").reverse().join("-") + " " + a[1]);
-  const dateB = new Date(b[0].split("/").reverse().join("-") + " " + b[1]);
-  return dateA - dateB;
-});
+let chart;
+let cowColors = {};
+let blinkOn = true;
 
-const labels = rawData.map(item => `${item[0]} ${item[1]}`);
-const maxWeight = Math.ceil(Math.max(...rawData.map(item => item[3])) / 100) * 100;
+async function loadData() {
+  const res = await fetch(apiURL);
+  const rows = await res.json();
+  if(!rows.length) return;
 
-const ctx = document.getElementById("cowChart").getContext("2d");
-const chart = new Chart(ctx, {
-  type: "bar",
-  data: { labels, datasets: [] },
-  options: {
-    responsive: true,
-    plugins: {
-      datalabels: {
-        color: "white",
-        anchor: "end",
-        align: "start",
-        rotation: -90,
-        formatter: value => value !== null ? value.toFixed(2) : ""
-      },
-      legend: { labels: { color: "white" } },
-      title: { display: true, text: "Cow Weight Monitoring", color: "white" }
-    },
-    scales: {
-      x: {
-        ticks: { color: "white", maxRotation: 90, minRotation: 45 },
-        grid: { color: "white" },
-        title: { display: true, text: "Date & Time", color: "white" }
-      },
-      y: {
-        beginAtZero: true,
-        max: maxWeight,
-        ticks: { color: "white", stepSize: 100 },
-        grid: { color: "white" },
-        title: { display: true, text: "Weight (kg)", color: "white" }
+  const cows = [...new Set(rows.map(r=>r.Cow))];
+  const colorPanel = document.getElementById("colorPanel");
+
+  /* Color Picker */
+  if(Object.keys(cowColors).length===0){
+    const preset=['#00ff00','#ffff00','#00c8ff','#ff00ff'];
+    colorPanel.innerHTML='';
+    cows.forEach((cow,i)=>{
+      cowColors[cow]=preset[i%preset.length];
+      const input=document.createElement('input');
+      input.type='color';
+      input.value=cowColors[cow];
+      input.oninput=()=>{ cowColors[cow]=input.value; updateChartColors(); };
+      const label=document.createElement('label');
+      label.textContent=cow;
+      label.appendChild(input);
+      colorPanel.appendChild(label);
+    });
+  }
+
+  const labels = rows.map(r => r.date);
+
+  const datasets = cows.map(cow => {
+    // Filter rows for this cow and sort by date
+    const cowRows = rows.filter(r => r.Cow === cow)
+                        .sort((a,b) => new Date(a.date) - new Date(b.date));
+
+    const blinkIndexes = [];
+    const data = rows.map((r, idx) => {
+      if(r.Cow !== cow) return null;
+
+      const todayIndex = cowRows.length - 1; // latest date for this cow
+      const todayWeight = cowRows[todayIndex].weight;
+      const prevWeight = todayIndex > 0 ? cowRows[todayIndex-1].weight : null;
+
+      if(prevWeight !== null && r.date === cowRows[todayIndex].date && todayWeight < prevWeight){
+        blinkIndexes.push(idx);
       }
-    }
-  },
-  plugins: [ChartDataLabels]
-});
 
-let savedUserSelection = null;
-let showingAll = false;
+      return r.weight;
+    });
 
-// Generate user selection chart
-document.getElementById("generateBtn").addEventListener("click", () => {
-  showingAll = false;
-  const cowCount = parseInt(document.getElementById("cowCount").value);
-  const controlsDiv = document.getElementById("cowControls");
-  controlsDiv.innerHTML = "";
-  chart.data.datasets = [];
-  savedUserSelection = [];
-
-  for (let i = 1; i <= cowCount; i++) {
-    const cowName = `Cow ${i}`;
-    const cowColor = `hsl(${(i * 60) % 360}, 100%, 60%)`;
-    const cowData = rawData.map(item => item[2] === cowName ? item[3] : null);
-
-    const dataset = {
-      label: cowName,
-      data: cowData,
-      backgroundColor: cowColor,
-      hidden: false
+    return {
+      label: cow,
+      data: data,
+      originalColor: cowColors[cow],
+      backgroundColor: data.map((_,idx)=>blinkIndexes.includes(idx)?'#ff0000':cowColors[cow]),
+      borderRadius:4,barThickness:22,borderWidth:0,blinkIndexes
     };
-    chart.data.datasets.push(dataset);
-    savedUserSelection.push(dataset);
+  });
 
-    const div = document.createElement("div");
-    div.className = "cow-option";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = true;
-    checkbox.id = cowName;
-    checkbox.addEventListener("change", () => {
-      chart.data.datasets[i - 1].hidden = !checkbox.checked;
-      chart.update();
+  if(!chart){
+    chart=new Chart(cowChart,{
+      type:'bar',
+      data:{labels,datasets},
+      options:{
+        responsive:true,
+        plugins:{
+          legend:{labels:{color:'#fff',font:{weight:'600'}}},
+          datalabels:{color:'#fff',anchor:'end',align:'top',font:{weight:'600',size:10}},
+          title:{display:true,text:'Cow Weight Monitoring',color:'#fff',font:{size:18,weight:'600'}}
+        },
+        scales:{
+          x:{ticks:{color:'#fff'},grid:{color:'rgba(255,255,255,0.25)'}},
+          y:{beginAtZero:true,ticks:{color:'#fff'},grid:{color:'rgba(255,255,255,0.25)'}}
+        }
+      },
+      plugins:[ChartDataLabels]
     });
-
-    const label = document.createElement("label");
-    label.htmlFor = cowName;
-    label.textContent = cowName;
-
-    const colorPicker = document.createElement("input");
-    colorPicker.type = "color";
-    colorPicker.value = rgbToHex(cowColor);
-    colorPicker.addEventListener("input", () => {
-      chart.data.datasets[i - 1].backgroundColor = colorPicker.value;
-      chart.update();
-    });
-
-    div.appendChild(checkbox);
-    div.appendChild(label);
-    div.appendChild(colorPicker);
-    controlsDiv.appendChild(div);
-  }
-
-  chart.update();
-});
-
-// Show all cows toggle button
-document.getElementById("showAllBtn").addEventListener("click", () => {
-  const btn = document.getElementById("showAllBtn");
-  const controlsDiv = document.getElementById("cowControls");
-
-  if (!showingAll) {
-    // Save current selection
-    savedUserSelection = [...chart.data.datasets];
-    // Generate all cows
-    chart.data.datasets = [];
-    controlsDiv.innerHTML = "";
-    const uniqueCows = [...new Set(rawData.map(item => item[2]))];
-    uniqueCows.forEach((cow, index) => {
-      const cowColor = `hsl(${(index * 60) % 360}, 100%, 60%)`;
-      const cowData = rawData.map(item => item[2] === cow ? item[3] : null);
-      chart.data.datasets.push({
-        label: cow,
-        data: cowData,
-        backgroundColor: cowColor,
-      });
-    });
-    btn.textContent = "Back to My Selection";
-    showingAll = true;
   } else {
-    // Restore previous selection
-    chart.data.datasets = savedUserSelection;
-    btn.textContent = "Show All Cows";
-    showingAll = false;
+    chart.data.labels = labels;
+    chart.data.datasets = datasets.map(ds=>{
+      ds.backgroundColor=ds.data.map((_,idx)=>ds.blinkIndexes.includes(idx)?(blinkOn?'#ff0000':ds.originalColor):ds.originalColor);
+      return ds;
+    });
+    chart.update();
   }
 
-  chart.update();
-});
-
-function rgbToHex(color) {
-  const ctx = document.createElement("canvas").getContext("2d");
-  ctx.fillStyle = color;
-  return ctx.fillStyle;
+  /* Status Panel */
+  const statusPanel=document.getElementById('statusPanel');
+  statusPanel.innerHTML='';
+  cows.forEach(cow=>{
+    const dropCount=datasets.find(d=>d.label===cow).blinkIndexes.length;
+    const div=document.createElement('div');
+    div.className='status-item '+(dropCount>0?'alert blink':'normal');
+    div.textContent=`${cow}: Latest Drop ${dropCount>0?'YES':'NO'}`;
+    statusPanel.appendChild(div);
+  });
 }
-</script>
 
+/* Blink toggle */
+setInterval(()=>{
+  blinkOn = !blinkOn;
+  if(chart){
+    chart.data.datasets.forEach(ds=>{
+      ds.backgroundColor = ds.data.map((_,idx)=>ds.blinkIndexes.includes(idx)?(blinkOn?'#ff0000':ds.originalColor):ds.originalColor);
+    });
+    chart.update();
+  }
+},500);
+
+function updateChartColors(){ chart.data.datasets.forEach(ds=>{ds.originalColor=cowColors[ds.label];}); chart.update(); }
+
+loadData();
+setInterval(loadData,5000);
+</script>
 </body>
 </html>
