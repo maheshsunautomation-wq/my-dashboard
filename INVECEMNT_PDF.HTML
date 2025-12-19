@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Investment PDF Download</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    body {
+      background-color: #add8e6; /* Light Blue */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      color: #000;
+    }
+    .loading {
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="loading">Generating PDF, please wait...</div>
+
+<script>
+async function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const url = "https://script.google.com/macros/s/AKfycbwMdTVLadqRIn8zDXupFlCDzfaNHb2ir7IOzYcl19sW0W2TG9HYm8-7znqoKvKuGoki9Q/exec";
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const headers = ["DATE","FEED","WATER","ELECTRICITY","MEDICINE","DOCTOR FEES","TRANSPORT","EXPORT","TOTAL AMOUNT"];
+
+    const rows = data.map(r => {
+      const feed = Number(r.FEED || 0);
+      const water = Number(r.WATER || 0);
+      const electricity = Number(r.ELECTRICITY || 0);
+      const medicine = Number(r.MEDICINE || 0);
+      const doctor = Number(r["DOCTOR FEES"] || 0);
+      const transport = Number(r.TRANSPORT || 0);
+      const exportAmt = Number(r.EXPORT || 0);
+      const total = feed + water + electricity + medicine + doctor + transport + exportAmt;
+
+      const date = new Date(r.DATE);
+      date.setHours(date.getHours() + 5, date.getMinutes() + 30); // IST
+
+      return [
+        date.toISOString().split("T")[0],
+        feed,
+        water,
+        electricity,
+        medicine,
+        doctor,
+        transport,
+        exportAmt,
+        total
+      ];
+    });
+
+    const doc = new jsPDF("landscape");
+    doc.text("Investment Expense Report", 14, 15);
+
+    doc.autoTable({
+      head: [headers],
+      body: rows,
+      startY: 20,
+      theme: "grid",
+      styles: { fontSize: 10 }
+    });
+
+    // Automatically download the PDF
+    doc.save("Investment_Report.pdf");
+
+    // Optional: close the page after download
+    setTimeout(() => window.close(), 500);
+
+  } catch(err) {
+    alert("Error fetching data!");
+    console.error(err);
+  }
+}
+
+// Trigger PDF generation as soon as the page loads
+window.addEventListener("load", generatePDF);
+</script>
+</body>
+</html>

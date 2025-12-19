@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Farmer Notes - Smart Cattle</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background: #f0f4f8;
+}
+
+header {
+  background: linear-gradient(90deg,#1a73e8,#00bfa5);
+  color: #fff;
+  padding: 25px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+  padding: 20px;
+}
+
+.panel-left, .panel-right {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align: center;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+}
+
+input, select, textarea, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background: #1a73e8;
+  color: white;
+  border: none;
+  font-weight: bold;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.delete-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th, td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  background: #00bfa5;
+  color: #fff;
+}
+
+.status-good { color: green; font-weight: bold; }
+.status-bad { color: red; font-weight: bold; }
+</style>
+</head>
+
+<body>
+
+<header>Smart Cattle - Daily Farmer Notes</header>
+
+<main>
+
+<!-- FORM -->
+<div class="panel-left">
+<h2>Enter Daily Note</h2>
+
+<form id="notesForm">
+
+<label>Date</label>
+<input type="date" id="date" required>
+
+<label>Cow ID</label>
+<input type="text" id="cowId" required>
+
+<label>User Name</label>
+<input type="text" id="userName" required>
+
+<label>Feed Batch</label>
+<select id="feedBatch" required>
+<option value="">Select</option>
+<option>A</option>
+<option>B</option>
+<option>C</option>
+</select>
+
+<label>Pregnancy</label>
+<select id="pregnancy" required>
+<option value="">Select</option>
+<option>Pregnant</option>
+<option>Not Pregnant</option>
+</select>
+
+<label>Medicine</label>
+<input type="text" id="medicine">
+
+<label>Health</label>
+<select id="health" required>
+<option value="">Select</option>
+<option value="Good">Good</option>
+<option value="Bad">Bad</option>
+</select>
+
+<textarea id="reason" placeholder="Reason if Bad"></textarea>
+
+<button type="submit">Save Note</button>
+</form>
+</div>
+
+<!-- TABLE -->
+<div class="panel-right">
+<h2>Today's Notes</h2>
+
+<table id="notesTable">
+<thead>
+<tr>
+<th>Date</th>
+<th>Cow</th>
+<th>User</th>
+<th>Feed</th>
+<th>Pregnancy</th>
+<th>Medicine</th>
+<th>Health</th>
+<th>Reason</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+</main>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyKvGPFhfXNzTMa_n8F3AvrdCKM1S_qCKr4fEVVVSBtrFmesOp4i90zb4v-QOdkJAgH/exec";
+
+const health = document.getElementById("health");
+const reason = document.getElementById("reason");
+const table = document.querySelector("#notesTable tbody");
+
+reason.style.display = "none";
+
+health.onchange = () => {
+  reason.style.display = health.value === "Bad" ? "block" : "none";
+  if (health.value !== "Bad") reason.value = "";
+};
+
+document.getElementById("notesForm").addEventListener("submit", e => {
+  e.preventDefault();
+
+  const id = "ID_" + Date.now();
+
+  const note = {
+    id,
+    date: date.value,
+    cowId: cowId.value,
+    userName: userName.value,
+    feedBatch: feedBatch.value,
+    pregnancy: pregnancy.value,
+    medicine: medicine.value || "-",
+    health: health.value,
+    reason: reason.value || "-"
+  };
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    body: JSON.stringify(note)
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.result === "success") {
+      const row = table.insertRow();
+      row.dataset.id = id;
+
+      row.innerHTML = `
+        <td>${note.date}</td>
+        <td>${note.cowId}</td>
+        <td>${note.userName}</td>
+        <td>${note.feedBatch}</td>
+        <td>${note.pregnancy}</td>
+        <td>${note.medicine}</td>
+        <td class="${note.health==="Good"?"status-good":"status-bad"}">${note.health}</td>
+        <td>${note.reason}</td>
+        <td><button class="delete-btn">Delete</button></td>
+      `;
+
+      row.querySelector(".delete-btn").onclick = () => deleteRow(row);
+      e.target.reset();
+      reason.style.display = "none";
+      alert("Saved ✅");
+    }
+  });
+});
+
+function deleteRow(row) {
+  if (!confirm("Delete this note?")) return;
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "delete",
+      id: row.dataset.id
+    })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.result === "deleted") {
+      row.remove();
+      alert("Deleted ❌");
+    }
+  });
+}
+</script>
+
+</body>
+</html>

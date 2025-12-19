@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cow Investment Operations</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Segoe UI, Arial, sans-serif;
+  background:#f4f6f9;
+  color:#1f2937;
+}
+.topbar{
+  background:#fff;
+  padding:16px 28px;
+  border-bottom:1px solid #d0d7e2;
+}
+.topbar h1{margin:0;font-size:20px}
+.canvas{padding:28px}
+.grid{
+  display:grid;
+  grid-template-columns:1.2fr 1fr;
+  gap:24px;
+}
+.panel{
+  background:#fff;
+  border:1px solid #d0d7e2;
+  border-radius:10px;
+  padding:24px;
+}
+.row{
+  display:grid;
+  grid-template-columns:200px 1fr;
+  align-items:center;
+  gap:14px;
+  margin-bottom:12px;
+}
+label{font-size:14px}
+input{
+  padding:10px;
+  border:1px solid #cbd5e1;
+  border-radius:6px;
+  font-size:14px;
+}
+button{
+  margin-top:16px;
+  padding:12px;
+  width:100%;
+  border:none;
+  background:#2563eb;
+  color:#fff;
+  border-radius:8px;
+  font-size:15px;
+  cursor:pointer;
+}
+.summary{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+.box{
+  padding:14px;
+  border-radius:8px;
+  color:#fff;
+}
+.feed{background:#2563eb}
+.water{background:#16a34a}
+.elec{background:#ea580c}
+.med{background:#7c3aed}
+.doc{background:#0891b2}
+.trans{background:#334155}
+.export{background:#475569}
+.total{background:#111827;grid-column:1/3}
+.box h4{margin:0;font-size:13px;font-weight:500}
+.box span{font-size:18px;font-weight:600}
+.month-label{
+  margin-top:12px;
+  font-weight:600;
+  color:#2563eb;
+}
+.chart{margin-top:24px}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <h1>🐄 Cow Investment Operations</h1>
+</div>
+
+<div class="canvas">
+
+<div class="grid">
+
+<!-- ENTRY -->
+<div class="panel">
+<h3>Investment Entry</h3>
+
+<div class="row">
+<label>Date & Time</label>
+<input type="datetime-local" id="datetime">
+</div>
+
+<div class="row"><label>Feed</label><input id="feed"></div>
+<div class="row"><label>Water</label><input id="water"></div>
+<div class="row"><label>Electricity</label><input id="elec"></div>
+<div class="row"><label>Medicine</label><input id="med"></div>
+<div class="row"><label>Doctor Fees</label><input id="doc"></div>
+<div class="row"><label>Transport</label><input id="trans"></div>
+<div class="row"><label>Export</label><input id="export"></div>
+
+<button onclick="saveData()">Save Investment</button>
+</div>
+
+<!-- SUMMARY -->
+<div class="panel">
+<h3>Summary (Latest Entry)</h3>
+<div class="summary">
+<div class="box feed"><h4>Feed</h4><span id="sFeed">₹0</span></div>
+<div class="box water"><h4>Water</h4><span id="sWater">₹0</span></div>
+<div class="box elec"><h4>Electricity</h4><span id="sElec">₹0</span></div>
+<div class="box med"><h4>Medicine</h4><span id="sMed">₹0</span></div>
+<div class="box doc"><h4>Doctor</h4><span id="sDoc">₹0</span></div>
+<div class="box trans"><h4>Transport</h4><span id="sTrans">₹0</span></div>
+<div class="box export"><h4>Export</h4><span id="sExport">₹0</span></div>
+<div class="box total"><h4>Total</h4><span id="sTotal">₹0</span></div>
+</div>
+<div class="month-label" id="showMonth"></div>
+</div>
+
+</div>
+
+<!-- CHART -->
+<div class="panel chart">
+<h3>Investment Trend</h3>
+<canvas id="chart"></canvas>
+</div>
+
+</div>
+
+<script>
+const sheetURL="https://script.google.com/macros/s/AKfycbzC5NQkEEpJTrK90cMCnseMy1CiKLW6SH4dMDcuBLE39b2byFiSq82wK1bdZajkxeAVFg/exec";
+
+const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+let rawData=[];
+let totals=new Array(12).fill(0);
+
+const chart=new Chart(document.getElementById("chart"),{
+  type:"line",
+  data:{labels:months,datasets:[{data:totals,borderColor:"#2563eb",tension:0.4,fill:false}]},
+  options:{plugins:{legend:{display:false}}}
+});
+
+/* LOAD DATA ON PAGE OPEN */
+fetch(sheetURL)
+.then(r=>r.json())
+.then(d=>{
+  rawData=d;
+  updateChart(new Date().getFullYear());
+});
+
+/* SAVE DATA */
+function saveData(){
+  const dt=document.getElementById("datetime").value;
+  if(!dt){ alert("Select date & time"); return; }
+
+  const feed=+document.getElementById("feed").value||0;
+  const water=+document.getElementById("water").value||0;
+  const elec=+document.getElementById("elec").value||0;
+  const med=+document.getElementById("med").value||0;
+  const doc=+document.getElementById("doc").value||0;
+  const trans=+document.getElementById("trans").value||0;
+  const exp=+document.getElementById("export").value||0;
+  const total=feed+water+elec+med+doc+trans+exp;
+
+  /* SUMMARY */
+  sFeed.innerText="₹"+feed;
+  sWater.innerText="₹"+water;
+  sElec.innerText="₹"+elec;
+  sMed.innerText="₹"+med;
+  sDoc.innerText="₹"+doc;
+  sTrans.innerText="₹"+trans;
+  sExport.innerText="₹"+exp;
+  sTotal.innerText="₹"+total;
+
+  const d=new Date(dt);
+  showMonth.innerText=`Saved: ${months[d.getMonth()]} ${d.getFullYear()}`;
+
+  /* ✅ SEND DATA USING GET (WORKS WITH GAS) */
+  const url =
+    sheetURL +
+    "?datetime=" + encodeURIComponent(dt) +
+    "&feed=" + feed +
+    "&water=" + water +
+    "&elec=" + elec +
+    "&med=" + med +
+    "&doc=" + doc +
+    "&trans=" + trans +
+    "&export=" + exp +
+    "&total=" + total;
+
+  fetch(url)
+  .then(r=>r.text())
+  .then(()=>{
+    rawData.push([dt,"",feed,water,elec,med,doc,trans,exp,total]);
+    updateChart(d.getFullYear());
+    clearInputs();
+    alert("Stored successfully ✅");
+  })
+  .catch(()=>{
+    alert("Error saving data ❌");
+  });
+}
+
+/* UPDATE CHART */
+function updateChart(year){
+  totals.fill(0);
+  rawData.forEach(r=>{
+    const d=new Date(r[0]);
+    if(d.getFullYear()===year){
+      totals[d.getMonth()]+=Number(r[9]);
+    }
+  });
+  chart.update();
+}
+
+/* CLEAR INPUTS */
+function clearInputs(){
+  document.getElementById("datetime").value="";
+  ["feed","water","elec","med","doc","trans","export"]
+    .forEach(id=>document.getElementById(id).value="");
+}
+</script>
+
+</body>
+</html>
