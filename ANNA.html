@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Cow Weight Dashboard</title>
+<title>Cow Weight Dashboard - Latest Month</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
@@ -25,10 +25,6 @@ canvas {
   max-width: 96%; margin-bottom: 25px;
 }
 
-#colorPanel { margin-bottom:18px; display:flex; justify-content:center; flex-wrap:wrap;}
-#colorPanel label { margin:0 12px; font-weight:600; display:flex; align-items:center; gap:6px; }
-input[type=color]{width:34px;height:22px;border:none;cursor:pointer;border-radius:5px;}
-
 #statusPanel{display:flex; justify-content:center; flex-wrap:wrap; margin-top:20px;}
 .status-item{margin:10px;padding:16px 22px;border-radius:12px;font-weight:600;min-width:150px;background:#0f0f0f;border-left:5px solid #666;box-shadow:0 0 15px rgba(0,0,0,0.8);}
 .normal{border-color:#00ff5a;}
@@ -39,8 +35,7 @@ input[type=color]{width:34px;height:22px;border:none;cursor:pointer;border-radiu
 </head>
 <body>
 
-<h2>🐄 Cow Weight Monitoring</h2>
-<div id="colorPanel"></div>
+<h2>🐄 Cow Weight Monitoring - Latest Month</h2>
 <canvas id="cowChart"></canvas>
 <div id="statusPanel"></div>
 
@@ -48,8 +43,13 @@ input[type=color]{width:34px;height:22px;border:none;cursor:pointer;border-radiu
 const apiURL = "https://script.google.com/macros/s/AKfycbxIzCALAAu3hqrsn3u9jXJCLtCWNwK8SZx6I1vLrYFw3HQpHVWGgCaT-YvH-keSsajQ/exec";
 
 let chart;
-let cowColors = {};
 let blinkOn = true;
+
+// Helper to get year-month string
+function getMonth(dateStr){
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}`;
+}
 
 async function loadData() {
   const res = await fetch(apiURL);
@@ -57,78 +57,55 @@ async function loadData() {
   if(!rows.length) return;
 
   const cows = [...new Set(rows.map(r=>r.Cow))];
-  const colorPanel = document.getElementById("colorPanel");
 
-  /* Color Picker */
-  if(Object.keys(cowColors).length===0){
-    const preset=['#00ff00','#ffff00','#00c8ff','#ff00ff'];
-    colorPanel.innerHTML='';
-    cows.forEach((cow,i)=>{
-      cowColors[cow]=preset[i%preset.length];
-      const input=document.createElement('input');
-      input.type='color';
-      input.value=cowColors[cow];
-      input.oninput=()=>{ cowColors[cow]=input.value; updateChartColors(); };
-      const label=document.createElement('label');
-      label.textContent=cow;
-      label.appendChild(input);
-      colorPanel.appendChild(label);
-    });
-  }
+  const latestMonthData = {};
+  const prevMonthData = {};
 
-  const labels = rows.map(r => r.date);
+  // Process each cow
+  cows.forEach(cow=>{
+    const cowRows = rows.filter(r=>r.Cow===cow)
+                        .sort((a,b)=>new Date(a.date)-new Date(b.date));
+    
+    // Get unique months sorted
+    const months = [...new Set(cowRows.map(r=>getMonth(r.date)))].sort();
+    if(months.length === 0) return;
 
-  const datasets = cows.map(cow => {
-    // Filter rows for this cow and sort by date
-    const cowRows = rows
-      .filter(r => r.Cow === cow)
-      .sort((a,b) => new Date(a.date) - new Date(b.date));
+    const latestMonth = months[months.length-1];
+    const prevMonth = months.length > 1 ? months[months.length-2] : null;
 
-    const blinkIndexes = [];
-    const data = rows.map((r, idx) => {
-      if(r.Cow !== cow) return null;
+    // Latest month weight = last entry in that month
+    latestMonthData[cow] = cowRows.filter(r=>getMonth(r.date)===latestMonth).slice(-1)[0].weight;
 
-      // Month-wise comparison
-      const [day, month, year] = r.date.split("/");
-      const monthStr = month + "/" + year;
-
-      // Find latest previous month weight for this cow
-      const prevMonthRow = cowRows
-        .filter(row=>{
-          const [d,m,y] = row.date.split("/");
-          return row.date !== r.date && (m+"/"+y) < monthStr;
-        }).pop();
-
-      const todayWeight = r.weight;
-      const prevWeight = prevMonthRow ? prevMonthRow.weight : null;
-
-      // If latest month weight drops
-      if(prevWeight !== null && r.date === cowRows[cowRows.length-1].date && todayWeight < prevWeight){
-        blinkIndexes.push(idx);
-      }
-
-      return r.weight;
-    });
-
-    return {
-      label: cow,
-      data: data,
-      originalColor: cowColors[cow],
-      backgroundColor: data.map((_,idx)=>blinkIndexes.includes(idx)?'#ff0000':cowColors[cow]),
-      borderRadius:4, barThickness:22, borderWidth:0, blinkIndexes
-    };
+    // Previous month weight
+    prevMonthData[cow] = prevMonth ? cowRows.filter(r=>getMonth(r.date)===prevMonth).slice(-1)[0].weight : null;
   });
 
+  const labels = cows;
+  const datasets = [{
+    label: 'Weight',
+    data: labels.map(cow=>latestMonthData[cow]),
+    originalColor: '#00ff5a', // green default
+    backgroundColor: labels.map(cow=>{
+      if(prevMonthData[cow] !== null && latestMonthData[cow] < prevMonthData[cow]){
+        return '#ff0000';
+      }
+      return '#00ff5a';
+    }),
+    blinkIndexes: labels.map((cow,i)=>{
+      return (prevMonthData[cow] !== null && latestMonthData[cow] < prevMonthData[cow]) ? i : -1;
+    })
+  }];
+
   if(!chart){
-    chart=new Chart(cowChart,{
+    chart = new Chart(cowChart,{
       type:'bar',
       data:{labels,datasets},
       options:{
         responsive:true,
         plugins:{
-          legend:{labels:{color:'#fff',font:{weight:'600'}}},
-          datalabels:{color:'#fff',anchor:'end',align:'top',font:{weight:'600',size:10}},
-          title:{display:true,text:'Cow Weight Monitoring',color:'#fff',font:{size:18,weight:'600'}}
+          legend:{display:false},
+          datalabels:{color:'#fff',anchor:'end',align:'top',font:{weight:'600',size:12}},
+          title:{display:true,text:'Cow Weight - Latest Month',color:'#fff',font:{size:18,weight:'600'}}
         },
         scales:{
           x:{ticks:{color:'#fff'},grid:{color:'rgba(255,255,255,0.25)'}},
@@ -138,41 +115,38 @@ async function loadData() {
       plugins:[ChartDataLabels]
     });
   } else {
-    chart.data.labels = labels;
     chart.data.datasets = datasets.map(ds=>{
-      ds.backgroundColor=ds.data.map((_,idx)=>ds.blinkIndexes.includes(idx)?(blinkOn?'#ff0000':ds.originalColor):ds.originalColor);
+      ds.backgroundColor = ds.data.map((_,idx)=>ds.blinkIndexes.includes(idx) && ds.blinkIndexes[idx]!==-1 ? (blinkOn?'#ff0000':ds.originalColor) : ds.originalColor);
       return ds;
     });
     chart.update();
   }
 
-  /* Status Panel */
+  // Status Panel
   const statusPanel=document.getElementById('statusPanel');
   statusPanel.innerHTML='';
-  cows.forEach(cow=>{
-    const dropCount=datasets.find(d=>d.label===cow).blinkIndexes.length;
+  labels.forEach((cow,i)=>{
+    const isDrop = prevMonthData[cow] !== null && latestMonthData[cow] < prevMonthData[cow];
     const div=document.createElement('div');
-    div.className='status-item '+(dropCount>0?'alert blink':'normal');
-    div.textContent=`${cow}: Latest Drop ${dropCount>0?'YES':'NO'}`;
+    div.className='status-item '+(isDrop?'alert blink':'normal');
+    div.textContent=`${cow}: Last Month Drop ${isDrop?'YES':'NO'}`;
     statusPanel.appendChild(div);
   });
 }
 
-/* Blink toggle */
+// Blink toggle
 setInterval(()=>{
   blinkOn = !blinkOn;
   if(chart){
     chart.data.datasets.forEach(ds=>{
-      ds.backgroundColor = ds.data.map((_,idx)=>ds.blinkIndexes.includes(idx)?(blinkOn?'#ff0000':ds.originalColor):ds.originalColor);
+      ds.backgroundColor = ds.data.map((_,idx)=>ds.blinkIndexes.includes(idx) && ds.blinkIndexes[idx]!==-1 ? (blinkOn?'#ff0000':ds.originalColor) : ds.originalColor);
     });
     chart.update();
   }
 },500);
 
-function updateChartColors(){ chart.data.datasets.forEach(ds=>{ds.originalColor=cowColors[ds.label];}); chart.update(); }
-
 loadData();
-setInterval(loadData,5000);
+setInterval(loadData,10000);
 </script>
 </body>
 </html>
