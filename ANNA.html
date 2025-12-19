@@ -80,18 +80,30 @@ async function loadData() {
 
   const datasets = cows.map(cow => {
     // Filter rows for this cow and sort by date
-    const cowRows = rows.filter(r => r.Cow === cow)
-                        .sort((a,b) => new Date(a.date) - new Date(b.date));
+    const cowRows = rows
+      .filter(r => r.Cow === cow)
+      .sort((a,b) => new Date(a.date) - new Date(b.date));
 
     const blinkIndexes = [];
     const data = rows.map((r, idx) => {
       if(r.Cow !== cow) return null;
 
-      const todayIndex = cowRows.length - 1; // latest date for this cow
-      const todayWeight = cowRows[todayIndex].weight;
-      const prevWeight = todayIndex > 0 ? cowRows[todayIndex-1].weight : null;
+      // Month-wise comparison
+      const [day, month, year] = r.date.split("/");
+      const monthStr = month + "/" + year;
 
-      if(prevWeight !== null && r.date === cowRows[todayIndex].date && todayWeight < prevWeight){
+      // Find latest previous month weight for this cow
+      const prevMonthRow = cowRows
+        .filter(row=>{
+          const [d,m,y] = row.date.split("/");
+          return row.date !== r.date && (m+"/"+y) < monthStr;
+        }).pop();
+
+      const todayWeight = r.weight;
+      const prevWeight = prevMonthRow ? prevMonthRow.weight : null;
+
+      // If latest month weight drops
+      if(prevWeight !== null && r.date === cowRows[cowRows.length-1].date && todayWeight < prevWeight){
         blinkIndexes.push(idx);
       }
 
@@ -103,7 +115,7 @@ async function loadData() {
       data: data,
       originalColor: cowColors[cow],
       backgroundColor: data.map((_,idx)=>blinkIndexes.includes(idx)?'#ff0000':cowColors[cow]),
-      borderRadius:4,barThickness:22,borderWidth:0,blinkIndexes
+      borderRadius:4, barThickness:22, borderWidth:0, blinkIndexes
     };
   });
 
