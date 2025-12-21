@@ -72,34 +72,34 @@ canvas#bgCanvas {
 
 /* Grid Layout */
 .grid {
-    display:grid;
+     display:grid;
     grid-template-columns:repeat(3,260px);
-    grid-auto-rows:150px;
+    grid-auto-rows:auto;
     gap:30px;
     z-index:10;
-    justify-content: center; /* center the grid horizontally */
+    justify-content:center;
 }
 
 /* Extra Grid Layout */
-.extra-grid {
-    margin-top:30px; /* spacing from previous grid */
-    display:grid;
-    grid-template-columns:repeat(3,260px);
-    grid-auto-rows:150px;
-    gap:30px;
-    z-index:10;
-    justify-content: center; /* center the grid horizontally */
-}
+
 
 /* Premium Buttons */
 .btn {
     display:flex;
     justify-content:center;
     align-items:center;
-    text-decoration:none;
-    font-size:22px;
+    text-align:center;
+
+    font-size:22px;          /* unchanged */
     font-weight:bold;
-    color: #fff;
+    color:#fff;
+
+    padding:22px 18px;       /* increased padding */
+    min-height:170px;        /* more box height */
+    line-height:1.4;         /* text breathing space */
+    text-decoration: none;   /* ✅ UNDERLINE REMOVED */
+
+
     border-radius:20px;
     position:relative;
     overflow:hidden;
@@ -107,6 +107,9 @@ canvas#bgCanvas {
     box-shadow:6px 6px 16px #0a0f14,-6px -6px 16px #2a3c4e;
     transition:0.3s;
 }
+
+
+
 .btn::before {
     content:"";
     position:absolute;
@@ -139,32 +142,26 @@ canvas#bgCanvas {
 .btn:hover::after { left:120%; }
 
 /* Original 3x3 Grid Button Colors */
-.grid a:nth-child(1){ background:linear-gradient(145deg,#e7424fcc,#ff7866aa);}
-.grid a:nth-child(2){ background:linear-gradient(145deg,#4facfe,#19fe00bb);}
+.grid a:nth-child(1){ background:linear-gradient(145deg,#ef0418e1,#05e2daf2);}
+.grid a:nth-child(2){ background:linear-gradient(145deg,#f60505,#0625f0f7);}
 .grid a:nth-child(3){ background:linear-gradient(145deg,#bd4bffb9,#ed0404da);}
-.grid a:nth-child(4){ background:linear-gradient(145deg,#054119da,#f2f9389b);}
+.grid a:nth-child(4){ background:linear-gradient(145deg,#04f052da,#06cf14f6);}
 .grid a:nth-child(5){ background:linear-gradient(145deg,#fac370b4,#fe4040ee);}
 .grid a:nth-child(6){ background:linear-gradient(145deg,#1305d9,#fbc2eb);}
-.grid a:nth-child(7){ background:linear-gradient(145deg,#ff2fc4,#830606a3);}
-.grid a:nth-child(8){ background:linear-gradient(145deg,#ff0026c4,#fff20074);}
+.grid a:nth-child(7){ background:linear-gradient(145deg,#ff2fc4,#efe305fc);}
+.grid a:nth-child(8){ background:linear-gradient(145deg,#ff0000de,#00ffcce8);}
 .grid a:nth-child(9){ background:linear-gradient(145deg,#f71e1e93,#ffd200);}
-
-/* Extra 3x2 Grid Premium Button Colors - UPDATED */
-.extra-grid a:nth-child(1) { background: linear-gradient(to right, #FF7E5F, #8c8cffad); } /* orange-pink */
-.extra-grid a:nth-child(2) { background: linear-gradient(to right, #00C6FF, #ff0037d6); } /* vibrant blue */
-.extra-grid a:nth-child(3) { background: linear-gradient(to right, #9D50BB, #4baa48); } /* purple-pink */
-.extra-grid a:nth-child(4) { background: linear-gradient(to right, #4b43e9, #f93838); } /* greenish aqua */
-.extra-grid a:nth-child(5) { background: linear-gradient(to right, #f7971e, #ff0000b4); } /* yellow-orange */
-.extra-grid a:nth-child(6) { background: linear-gradient(to right, #cb072e75, #a199ffc2); } /* pink gradient */
-.extra-grid a:nth-child(7) { background: linear-gradient(to right, #e20407, #d3ef04ee); } /* pink gradient */
-.extra-grid a:nth-child(8) { background: linear-gradient(to right, #02f6ee, #1401e2f2); } /* pink gradient */
-.extra-grid a:nth-child(9) { background: linear-gradient(to right, #1df401, #ed04aff3); } /* pink gradient */
-.extra-grid a:nth-child(10) { background: linear-gradient(to right, #027213, #fe0303f3); } /* pink gradient */
-
-.extra-grid a:nth-child(11) { background: linear-gradient(to right, #11e3e784, #f70606f3); } /* pink gradient */
-
-
-
+.grid a:nth-child(10){ background:linear-gradient(to right,#FF7E5F,#8c8cffad);}
+.grid a:nth-child(11){ background:linear-gradient(to right,#00C6FF,#ff0037d6);}
+.grid a:nth-child(12){ background:linear-gradient(to right,#9D50BB,#4baa48);}
+.grid a:nth-child(13){ background:linear-gradient(to right,#4b43e9,#9f04aa);}
+.grid a:nth-child(14){ background:linear-gradient(to right,#f7971e,#ff0000b4);}
+.grid a:nth-child(15){ background:linear-gradient(to right,#cb072e75,#a199ffc2);}
+.grid a:nth-child(16){ background:linear-gradient(to right,#e20407,#d3ef04ee);}
+.grid a:nth-child(17){ background:linear-gradient(to right,#02f6ee,#1401e2f2);}
+.grid a:nth-child(18){ background:linear-gradient(to right,#1df401,#ed04aff3);}
+.grid a:nth-child(19){ background:linear-gradient(to right,#027213,#fe0303f3);}
+.grid a:nth-child(20){ background:linear-gradient(to right,#11e3e784,#f70606f3);}
 
 </style>
 </head>
@@ -173,36 +170,34 @@ canvas#bgCanvas {
 
 <canvas id="bgCanvas"></canvas>
 
-<div class="topbar">Dashboard</div>
+<div class="topbar">Cattle Management System</div>
 
 <button id="toggleBtn" class="toggle-btn disabled">NO ACTIVE CALL</button>
 
 <!-- Main 3x3 Grid -->
 <div class="grid">
-  <a class="btn" id="cowPdfBtn" href="#">COW PDF</a>
-  <a class="btn" href="temp_pdf.html" target="_blank">TEMP PDF</a>
-  <a class="btn" href="gas_pdf.html" target="_blank">GAS PDF</a>
-  <a class="btn" href="schedule.html" target="_blank">MEDICINE SCHEDULE</a>
-  <a class="btn" id="sensorChartBtn" href="#" target="_blank">SENSOR CHART</a>
-  <a class="btn" href="temp_chart.html" target="_blank">TEMP CHART</a>
-  <a class="btn" href="ANNA.html" target="_blank">COW CHART</a>
-  <a class="btn" href="http://192.168.43.159" target="_blank">LIVE SENSOR DATA</a>
-  <a class="btn" href="http://192.168.43.143" target="_blank">CAMERA</a>
-</div>
+  <a class="btn" href="ANNA.html" target="_blank">Cattle Weigth Growth Analysis</a>
+  <a class="btn"  id="sensorChartBtn" href="#"  target="_blank">Environmental Safety Sensor Dashboard</a>
+  <a class="btn" href="temp_chart.html" target="_blank">Environmental Condition Chart</a>
+  <a class="btn" href="schedule.html" target="_blank">Medication Schedule Manager</a>
+  <a class="btn" href="https://docs.google.com/spreadsheets/d/148uWODaBmh1LNy6v69CaXQCTsLl9UEDSavRTWov3ap8/edit?gid=0#gid=0" target="_blank">Annual Water Requirement Prediction</a>
+  <a class="btn" href="DOCTOR.HTML" target="_blank">Veterinary Visit Records</a>
+  <a class="btn" href="INVESTMENT.HTML" target="_blank">Farm Expenditure Entry</a>
+  <a class="btn" href="USER_DETAILS.HTML" target="_blank">Farm Activity & Health Records</a>
+  <a class="btn" href="http://192.168.43.159" target="_blank">Live Sensor Monitoring</a>
+  <a class="btn" href="http://192.168.43.143" target="_blank">Live Farm Surveillance</a>
+  <a class="btn" href="https://docs.google.com/spreadsheets/d/1YXm37HkdblTZJCwvEYv27aUNV-Py_Kk5MSuFk8fYtvQ/edit?gid=0#gid=0" target="_blank">Temperature & Humidity Logs</a>
+  <a class="btn" href="https://docs.google.com/spreadsheets/d/1blZBzPwNScPcqMCDhVPmObv_d_6nlrfeAsM4lyLbiJU/edit?gid=0#gid=0" target="_blank">Environmental Sensor Logs</a>
+  <a class="btn" href="https://docs.google.com/spreadsheets/d/1Is_n3cbSF6geLZpVnAHwgWpFYoFYZze2pEOcDOtvW5g/edit?gid=0#gid=0" target="_blank">Cattle Records Sheet</a>
+  <a class="btn" href="https://docs.google.com/spreadsheets/d/1Q-m-pCDeCIWNwq235ONkD0vr6tqm7OSrABgPuI8ohyo/edit?gid=0#gid=0" target="_blank">Medication Records Sheet</a>
+  <a class="btn" href="https://docs.google.com/spreadsheets/d/1ao4ikAph8D3rwgnJZmTm0JOBgZNUVCLvopMvfhee_Mo/edit?gid=0#gid=0" target="_blank">Farm Activity Logs Sheet</a>
+  <a class="btn" href="https://docs.google.com/spreadsheets/d/1tHhqTglzdSmtWwJQlckOETVbaR0PFggLH2-6rVXD2BQ/edit?gid=0#gid=0" target="_blank">Expenditure Records Sheet</a>
+  <a class="btn" id="cowPdfBtn" href="#">Cattle Data Report (PDF)</a>
+  <a class="btn" href="temp_pdf.html" target="_blank">Temperature & Humidity Report (PDF)</a>
+  <a class="btn" href="gas_pdf.html" target="_blank">Gas & Air Quality Report (PDF)</a>
+  <a class="btn" href="INVECEMNT_PDF.HTML" target="_blank">Expenditure Summary Report (PDF)</a>
+  
 
-<!-- Extra 3x2 Grid -->
-<div class="grid extra-grid">
-  <a class="btn" href="https://docs.google.com/spreadsheets/d/1YXm37HkdblTZJCwvEYv27aUNV-Py_Kk5MSuFk8fYtvQ/edit?gid=0#gid=0" target="_blank">TEMP SHEET</a>
-  <a class="btn" href="https://docs.google.com/spreadsheets/d/1blZBzPwNScPcqMCDhVPmObv_d_6nlrfeAsM4lyLbiJU/edit?gid=0#gid=0" target="_blank">SENSOR SHEET</a>
-  <a class="btn" href="https://docs.google.com/spreadsheets/d/1Is_n3cbSF6geLZpVnAHwgWpFYoFYZze2pEOcDOtvW5g/edit?gid=0#gid=0" target="_blank">COW SHEET</a>
-  <a class="btn" href="https://docs.google.com/spreadsheets/d/1Q-m-pCDeCIWNwq235ONkD0vr6tqm7OSrABgPuI8ohyo/edit?gid=0#gid=0" target="_blank">MEDICINE SHEET</a>
-  <a class="btn" href="https://docs.google.com/spreadsheets/d/148uWODaBmh1LNy6v69CaXQCTsLl9UEDSavRTWov3ap8/edit?gid=0#gid=0" target="_blank">WATER PREDICATION</a>
-  <a class="btn" href="DOCTOR.HTML" target="_blank">DOCTOR DETAILS</a>
-  <a class="btn" href="INVESTMENT.HTML" target="_blank">INVESTMENT COST</a>
-  <a class="btn" href="https://docs.google.com/spreadsheets/d/1tHhqTglzdSmtWwJQlckOETVbaR0PFggLH2-6rVXD2BQ/edit?gid=0#gid=0" target="_blank">INVESTMENT SHEET</a>
-  <a class="btn" href="INVECEMNT_PDF.HTML" target="_blank">INVESTMENT PDF</a>
-  <a class="btn" href="USER_DETAILS.HTML" target="_blank">FORMER DETAILS</a>
-  <a class="btn" href="https://docs.google.com/spreadsheets/d/1ao4ikAph8D3rwgnJZmTm0JOBgZNUVCLvopMvfhee_Mo/edit?gid=0#gid=0" target="_blank">FORMER SHEET</a>
 </div>
 
 <script src="cow_pdf.js"></script>
