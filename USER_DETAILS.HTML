@@ -13,7 +13,6 @@ body {
   font-family: 'Roboto', sans-serif;
   background: #f0f4f8;
 }
-
 header {
   background: linear-gradient(90deg,#1a73e8,#00bfa5);
   color: #fff;
@@ -22,30 +21,24 @@ header {
   font-size: 28px;
   font-weight: 700;
 }
-
 main {
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 20px;
   padding: 20px;
 }
-
 .panel-left, .panel-right {
   background: #fff;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.1);
 }
-
-h2 {
-  text-align: center;
-}
-
+h2 { text-align: center; }
 label {
   display: block;
   margin-top: 10px;
+  font-weight: 500;
 }
-
 input, select, textarea, button {
   width: 100%;
   padding: 10px;
@@ -53,7 +46,7 @@ input, select, textarea, button {
   border-radius: 6px;
   border: 1px solid #ccc;
 }
-
+textarea { resize: none; }
 button {
   background: #1a73e8;
   color: white;
@@ -62,7 +55,7 @@ button {
   margin-top: 15px;
   cursor: pointer;
 }
-
+button:hover { opacity: 0.9; }
 .delete-btn {
   background: #f44336;
   color: white;
@@ -71,24 +64,20 @@ button {
   border-radius: 5px;
   cursor: pointer;
 }
-
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
 }
-
 th, td {
   padding: 10px;
   text-align: center;
   border-bottom: 1px solid #eee;
 }
-
 th {
   background: #00bfa5;
   color: #fff;
 }
-
 .status-good { color: green; font-weight: bold; }
 .status-bad { color: red; font-weight: bold; }
 </style>
@@ -96,18 +85,18 @@ th {
 
 <body>
 
-<header>Smart Cattle - Daily Farmer Notes</header>
+<header>Smart Cattle – Daily Farmer Notes</header>
 
 <main>
 
-<!-- FORM -->
+<!-- LEFT FORM -->
 <div class="panel-left">
 <h2>Enter Daily Note</h2>
 
 <form id="notesForm">
 
-<label>Date</label>
-<input type="date" id="date" required>
+<label>Date & Time</label>
+<input type="datetime-local" id="dateTime" required>
 
 <label>Cow ID</label>
 <input type="text" id="cowId" required>
@@ -140,20 +129,21 @@ th {
 <option value="Bad">Bad</option>
 </select>
 
-<textarea id="reason" placeholder="Reason if Bad"></textarea>
+<textarea id="reason" placeholder="Reason if health is Bad"></textarea>
 
 <button type="submit">Save Note</button>
+
 </form>
 </div>
 
-<!-- TABLE -->
+<!-- RIGHT HISTORY -->
 <div class="panel-right">
-<h2>Today's Notes</h2>
+<h2>History (From Google Sheet)</h2>
 
 <table id="notesTable">
 <thead>
 <tr>
-<th>Date</th>
+<th>Date & Time</th>
 <th>Cow</th>
 <th>User</th>
 <th>Feed</th>
@@ -166,34 +156,69 @@ th {
 </thead>
 <tbody></tbody>
 </table>
+
 </div>
 
 </main>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyKvGPFhfXNzTMa_n8F3AvrdCKM1S_qCKr4fEVVVSBtrFmesOp4i90zb4v-QOdkJAgH/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykx309hwMFF3t1gwrQxSFku0XF9Y8m-7U-fNlNCPfoj5eOIwzKOaAboxL6PibcBtW-tA/exec";
 
 const health = document.getElementById("health");
 const reason = document.getElementById("reason");
-const table = document.querySelector("#notesTable tbody");
+const tableBody = document.querySelector("#notesTable tbody");
 
+// ---------- RESET FORM (NO AUTO TIME) ----------
+function resetForm() {
+  document.getElementById("notesForm").reset();
+  reason.style.display = "none";
+}
+
+// ---------- HEALTH LOGIC ----------
 reason.style.display = "none";
-
 health.onchange = () => {
   reason.style.display = health.value === "Bad" ? "block" : "none";
   if (health.value !== "Bad") reason.value = "";
 };
 
+// ---------- LOAD HISTORY ----------
+function loadHistory() {
+  fetch(`${SCRIPT_URL}?action=get`)
+    .then(res => res.json())
+    .then(data => {
+      tableBody.innerHTML = "";
+
+      if (data.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="9">No records found</td></tr>`;
+        return;
+      }
+
+      data.forEach(item => {
+        const row = tableBody.insertRow();
+        row.innerHTML = `
+          <td>${item.dateTime}</td>
+          <td>${item.cowId}</td>
+          <td>${item.username}</td>
+          <td>${item.feedBatch}</td>
+          <td>${item.pregnancy}</td>
+          <td>${item.medicine}</td>
+          <td class="${item.health === "Good" ? "status-good" : "status-bad"}">${item.health}</td>
+          <td>${item.reason}</td>
+          <td><button class="delete-btn">Delete</button></td>
+        `;
+        row.querySelector(".delete-btn").onclick = () => deleteRecord(item.id);
+      });
+    });
+}
+
+// ---------- SAVE ----------
 document.getElementById("notesForm").addEventListener("submit", e => {
   e.preventDefault();
 
-  const id = "ID_" + Date.now();
-
-  const note = {
-    id,
-    date: date.value,
+  const payload = {
+    dateTime: new Date(dateTime.value).toISOString(),
     cowId: cowId.value,
-    userName: userName.value,
+    username: userName.value,
     feedBatch: feedBatch.value,
     pregnancy: pregnancy.value,
     medicine: medicine.value || "-",
@@ -203,52 +228,31 @@ document.getElementById("notesForm").addEventListener("submit", e => {
 
   fetch(SCRIPT_URL, {
     method: "POST",
-    body: JSON.stringify(note)
+    body: JSON.stringify(payload)
   })
-  .then(r => r.json())
-  .then(res => {
-    if (res.result === "success") {
-      const row = table.insertRow();
-      row.dataset.id = id;
-
-      row.innerHTML = `
-        <td>${note.date}</td>
-        <td>${note.cowId}</td>
-        <td>${note.userName}</td>
-        <td>${note.feedBatch}</td>
-        <td>${note.pregnancy}</td>
-        <td>${note.medicine}</td>
-        <td class="${note.health==="Good"?"status-good":"status-bad"}">${note.health}</td>
-        <td>${note.reason}</td>
-        <td><button class="delete-btn">Delete</button></td>
-      `;
-
-      row.querySelector(".delete-btn").onclick = () => deleteRow(row);
-      e.target.reset();
-      reason.style.display = "none";
-      alert("Saved ✅");
-    }
+  .then(() => {
+    resetForm();    // ✅ clear inputs (manual date only)
+    loadHistory();  // reload from Google Sheet
+    alert("Saved successfully ✅");
   });
 });
 
-function deleteRow(row) {
-  if (!confirm("Delete this note?")) return;
+// ---------- DELETE ----------
+function deleteRecord(id) {
+  if (!confirm("Delete this record?")) return;
 
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      action: "delete",
-      id: row.dataset.id
-    })
-  })
-  .then(r => r.json())
-  .then(res => {
-    if (res.result === "deleted") {
-      row.remove();
-      alert("Deleted ❌");
-    }
-  });
+  fetch(`${SCRIPT_URL}?action=delete&id=${id}`)
+    .then(() => {
+      loadHistory();
+      alert("Deleted successfully ❌");
+    });
 }
+
+// ---------- INITIAL LOAD ----------
+window.onload = () => {
+  resetForm();    // inputs empty on refresh
+  loadHistory();  // history from sheet
+};
 </script>
 
 </body>
