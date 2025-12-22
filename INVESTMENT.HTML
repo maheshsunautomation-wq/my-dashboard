@@ -2,237 +2,295 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Cow Investment Operations</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Records</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
-body{
-  margin:0;
-  font-family:Segoe UI, Arial, sans-serif;
-  background:#f4f6f9;
-  color:#1f2937;
+body { font-family: 'Roboto', sans-serif; background: #f0f2f7; color: #1f2937; margin: 0; padding: 20px; }
+h1 { text-align: center; margin-bottom: 40px; font-size: 32px; color: #111827; }
+
+.container { display: flex; flex-wrap: wrap; gap: 40px; justify-content: center; align-items: flex-start; }
+
+.card { background: #fff; padding: 30px; border-radius: 20px; flex: 1; min-width: 320px; max-width: 400px; box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+.card h2 { margin-top: 0; margin-bottom: 25px; font-size: 22px; color: #111827; }
+.card input { width: 100%; padding: 12px 15px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #d1d5db; font-size: 16px; outline: none; transition: all 0.2s; }
+.card input:focus { border-color: #6366f1; box-shadow: 0 0 8px rgba(99,102,241,0.4); }
+.card button { width: 100%; padding: 14px; background-color: #6366f1; color: #fff; font-weight: 600; border: none; border-radius: 12px; cursor: pointer; margin-top: 10px; font-size: 16px; transition: 0.3s; }
+.card button:hover { background-color: #4f46e5; }
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 120px);
+  gap: 20px;
+  flex: 1;
+  min-width: 320px;
 }
-.topbar{
-  background:#fff;
-  padding:16px 28px;
-  border-bottom:1px solid #d0d7e2;
+
+.summary .box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  transition: transform 0.25s, box-shadow 0.25s;
 }
-.topbar h1{margin:0;font-size:20px}
-.canvas{padding:28px}
-.grid{
-  display:grid;
-  grid-template-columns:1.2fr 1fr;
-  gap:24px;
+
+.summary .box span {
+  font-size: 22px;
+  margin-top: 10px;
 }
-.panel{
-  background:#fff;
-  border:1px solid #d0d7e2;
-  border-radius:10px;
-  padding:24px;
+
+.summary .box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
-.row{
-  display:grid;
-  grid-template-columns:200px 1fr;
-  align-items:center;
-  gap:14px;
-  margin-bottom:12px;
+
+.box-feed { background-color: #3b82f6; }
+.box-water { background-color: #16a34a; }
+.box-electric { background-color: #f97316; }
+.box-medicine { background-color: #8b5cf6; }
+.box-doctor { background-color: #0ea5e9; }
+.box-maintenance { background-color: #374151; }
+.box-total { background-color: #111827; grid-column: span 3; font-size: 20px; }
+
+.chart-box { background: #fff; padding: 25px; border-radius: 20px; margin-top: 40px; max-width: 900px; box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+
+table { width: 100%; border-collapse: collapse; margin-top: 40px; background: #fff; border-radius: 15px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+th, td { padding: 14px 12px; text-align: center; border-bottom: 1px solid #e5e7eb; font-size: 15px; }
+th { background: #6366f1; color: #fff; font-size: 16px; }
+td { color: #374151; }
+.delete-btn { background: #ef4444; color: #fff; border: none; padding: 6px 12px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+.delete-btn:hover { background: #dc2626; }
+
+@media (max-width: 900px) {
+  .container { flex-direction: column; align-items: center; }
+  .summary { grid-template-columns: 1fr 1fr; grid-template-rows: auto; gap: 15px; }
 }
-label{font-size:14px}
-input{
-  padding:10px;
-  border:1px solid #cbd5e1;
-  border-radius:6px;
-  font-size:14px;
-}
-button{
-  margin-top:16px;
-  padding:12px;
-  width:100%;
-  border:none;
-  background:#2563eb;
-  color:#fff;
-  border-radius:8px;
-  font-size:15px;
-  cursor:pointer;
-}
-.summary{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-}
-.box{
-  padding:14px;
-  border-radius:8px;
-  color:#fff;
-}
-.feed{background:#2563eb}
-.water{background:#16a34a}
-.elec{background:#ea580c}
-.med{background:#7c3aed}
-.doc{background:#0891b2}
-.trans{background:#334155}
-.export{background:#475569}
-.total{background:#111827;grid-column:1/3}
-.box h4{margin:0;font-size:13px;font-weight:500}
-.box span{font-size:18px;font-weight:600}
-.month-label{
-  margin-top:12px;
-  font-weight:600;
-  color:#2563eb;
-}
-.chart{margin-top:24px}
 </style>
 </head>
-
 <body>
 
-<div class="topbar">
-  <h1>🐄 Cow Investment Operations</h1>
+<h1>Financial Record</h1>
+
+<div class="container">
+  <div class="card" id="formBox">
+    <h2>Financial Entry</h2>
+    <input type="datetime-local" id="dateTime">
+    <input type="number" id="feed" placeholder="Feed" oninput="calcTotal()">
+    <input type="number" id="water" placeholder="Water" oninput="calcTotal()">
+    <input type="number" id="electric" placeholder="Electric" oninput="calcTotal()">
+    <input type="number" id="medicine" placeholder="Medicine" oninput="calcTotal()">
+    <input type="number" id="doctor" placeholder="Doctor" oninput="calcTotal()">
+    <input type="number" id="maintenance" placeholder="Maintenance" oninput="calcTotal()">
+    <input type="text" id="incomeStream" placeholder="Income Stream">
+    <input type="number" id="totalAmount" placeholder="Total" readonly>
+    <button onclick="saveData()">Save</button>
+  </div>
+
+  <div class="summary">
+    <div class="box box-feed">Feed ₹<span id="sumFeed">0</span></div>
+    <div class="box box-water">Water ₹<span id="sumWater">0</span></div>
+    <div class="box box-electric">Electricity ₹<span id="sumElectric">0</span></div>
+    <div class="box box-medicine">Medicine ₹<span id="sumMedicine">0</span></div>
+    <div class="box box-doctor">Doctor ₹<span id="sumDoctor">0</span></div>
+    <div class="box box-maintenance">Maintenance ₹<span id="sumMaintenance">0</span></div>
+    <div class="box box-total">Total ₹<span id="sumTotal">0</span></div>
+  </div>
 </div>
 
-<div class="canvas">
-
-<div class="grid">
-
-<!-- ENTRY -->
-<div class="panel">
-<h3>Investment Entry</h3>
-
-<div class="row">
-<label>Date & Time</label>
-<input type="datetime-local" id="datetime">
+<div class="chart-box">
+  <h2 style="text-align:center; margin-bottom:25px">Monthly Investment (Line Chart)</h2>
+  <canvas id="lineChart"></canvas>
 </div>
 
-<div class="row"><label>Feed</label><input id="feed"></div>
-<div class="row"><label>Water</label><input id="water"></div>
-<div class="row"><label>Electricity</label><input id="elec"></div>
-<div class="row"><label>Medicine</label><input id="med"></div>
-<div class="row"><label>Doctor Fees</label><input id="doc"></div>
-<div class="row"><label>Transport</label><input id="trans"></div>
-<div class="row"><label>Export</label><input id="export"></div>
-
-<button onclick="saveData()">Save Investment</button>
-</div>
-
-<!-- SUMMARY -->
-<div class="panel">
-<h3>Summary (Latest Entry)</h3>
-<div class="summary">
-<div class="box feed"><h4>Feed</h4><span id="sFeed">₹0</span></div>
-<div class="box water"><h4>Water</h4><span id="sWater">₹0</span></div>
-<div class="box elec"><h4>Electricity</h4><span id="sElec">₹0</span></div>
-<div class="box med"><h4>Medicine</h4><span id="sMed">₹0</span></div>
-<div class="box doc"><h4>Doctor</h4><span id="sDoc">₹0</span></div>
-<div class="box trans"><h4>Transport</h4><span id="sTrans">₹0</span></div>
-<div class="box export"><h4>Export</h4><span id="sExport">₹0</span></div>
-<div class="box total"><h4>Total</h4><span id="sTotal">₹0</span></div>
-</div>
-<div class="month-label" id="showMonth"></div>
-</div>
-
-</div>
-
-<!-- CHART -->
-<div class="panel chart">
-<h3>Investment Trend</h3>
-<canvas id="chart"></canvas>
-</div>
-
-</div>
+<table>
+<thead>
+<tr>
+  <th>Date</th><th>Feed</th><th>Water</th><th>Electric</th>
+  <th>Medicine</th><th>Doctor</th><th>Maintenance</th>
+  <th>Income Stream</th><th>Total</th><th>Delete</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
 
 <script>
-const sheetURL="https://script.google.com/macros/s/AKfycbzC5NQkEEpJTrK90cMCnseMy1CiKLW6SH4dMDcuBLE39b2byFiSq82wK1bdZajkxeAVFg/exec";
+const scriptURL = "https://script.google.com/macros/s/AKfycbyb36cAsF9p0x2fhQMqUDV_Vz-0Q8j5ce5EP8GwfVADdu2B9gVL5BrMZXP5b5WD0bAA/exec"; 
+let chart;
 
-const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-let rawData=[];
-let totals=new Array(12).fill(0);
+// Input elements
+const feed = document.getElementById("feed");
+const water = document.getElementById("water");
+const electric = document.getElementById("electric");
+const medicine = document.getElementById("medicine");
+const doctor = document.getElementById("doctor");
+const maintenance = document.getElementById("maintenance");
+const totalAmount = document.getElementById("totalAmount");
+const dateTime = document.getElementById("dateTime");
+const incomeStream = document.getElementById("incomeStream");
+const tableBody = document.getElementById("tableBody");
 
-const chart=new Chart(document.getElementById("chart"),{
-  type:"line",
-  data:{labels:months,datasets:[{data:totals,borderColor:"#2563eb",tension:0.4,fill:false}]},
-  options:{plugins:{legend:{display:false}}}
-});
+// Live summary calculation
+function calcTotal(){
+  const feedVal = +feed.value || 0;
+  const waterVal = +water.value || 0;
+  const electricVal = +electric.value || 0;
+  const medicineVal = +medicine.value || 0;
+  const doctorVal = +doctor.value || 0;
+  const maintenanceVal = +maintenance.value || 0;
 
-/* LOAD DATA ON PAGE OPEN */
-fetch(sheetURL)
-.then(r=>r.json())
-.then(d=>{
-  rawData=d;
-  updateChart(new Date().getFullYear());
-});
+  const total = feedVal + waterVal + electricVal + medicineVal + doctorVal + maintenanceVal;
+  totalAmount.value = total;
 
-/* SAVE DATA */
+  document.getElementById("sumFeed").textContent = feed.value ? feedVal : 0;
+  document.getElementById("sumWater").textContent = water.value ? waterVal : 0;
+  document.getElementById("sumElectric").textContent = electric.value ? electricVal : 0;
+  document.getElementById("sumMedicine").textContent = medicine.value ? medicineVal : 0;
+  document.getElementById("sumDoctor").textContent = doctor.value ? doctorVal : 0;
+  document.getElementById("sumMaintenance").textContent = maintenance.value ? maintenanceVal : 0;
+  document.getElementById("sumTotal").textContent = total ? total : 0;
+}
+
+// Reset form
+// Reset form
+function resetForm(){
+  feed.value = water.value = electric.value = medicine.value = doctor.value = maintenance.value = incomeStream.value = totalAmount.value = "";
+  dateTime.value = "";  // <-- Reset date/time input as well
+  calcTotal(); 
+}
+
+
+// Save data to Google Sheets
 function saveData(){
-  const dt=document.getElementById("datetime").value;
-  if(!dt){ alert("Select date & time"); return; }
+  const payload = {
+    dateTime: dateTime.value || new Date().toISOString(),
+    feed: feed.value || 0,
+    water: water.value || 0,
+    electric: electric.value || 0,
+    medicine: medicine.value || 0,
+    doctor: doctor.value || 0,
+    maintenance: maintenance.value || 0,
+    incomeStream: incomeStream.value || "",
+    totalAmount: totalAmount.value || 0
+  };
 
-  const feed=+document.getElementById("feed").value||0;
-  const water=+document.getElementById("water").value||0;
-  const elec=+document.getElementById("elec").value||0;
-  const med=+document.getElementById("med").value||0;
-  const doc=+document.getElementById("doc").value||0;
-  const trans=+document.getElementById("trans").value||0;
-  const exp=+document.getElementById("export").value||0;
-  const total=feed+water+elec+med+doc+trans+exp;
-
-  /* SUMMARY */
-  sFeed.innerText="₹"+feed;
-  sWater.innerText="₹"+water;
-  sElec.innerText="₹"+elec;
-  sMed.innerText="₹"+med;
-  sDoc.innerText="₹"+doc;
-  sTrans.innerText="₹"+trans;
-  sExport.innerText="₹"+exp;
-  sTotal.innerText="₹"+total;
-
-  const d=new Date(dt);
-  showMonth.innerText=`Saved: ${months[d.getMonth()]} ${d.getFullYear()}`;
-
-  /* ✅ SEND DATA USING GET (WORKS WITH GAS) */
-  const url =
-    sheetURL +
-    "?datetime=" + encodeURIComponent(dt) +
-    "&feed=" + feed +
-    "&water=" + water +
-    "&elec=" + elec +
-    "&med=" + med +
-    "&doc=" + doc +
-    "&trans=" + trans +
-    "&export=" + exp +
-    "&total=" + total;
-
-  fetch(url)
-  .then(r=>r.text())
-  .then(()=>{
-    rawData.push([dt,"",feed,water,elec,med,doc,trans,exp,total]);
-    updateChart(d.getFullYear());
-    clearInputs();
-    alert("Stored successfully ✅");
+  fetch(scriptURL, {
+    method: "POST",
+    body: JSON.stringify(payload)
   })
-  .catch(()=>{
-    alert("Error saving data ❌");
+  .then(()=> {
+    resetForm(); 
+    loadTable(); 
+  })
+  .catch(err => console.error("Error saving data: ", err));
+}
+
+// Load table data and summary of all saved entries
+function loadTable(){
+  fetch(scriptURL+"?action=get")
+  .then(r=>r.json())
+  .then(d=>{
+    tableBody.innerHTML="";
+    d.forEach(r=>{
+      tableBody.innerHTML+=`
+      <tr>
+        <td>${r.dateTime}</td>
+        <td>${r.feed}</td><td>${r.water}</td><td>${r.electric}</td>
+        <td>${r.medicine}</td><td>${r.doctor}</td><td>${r.maintenance}</td>
+        <td>${r.incomeStream}</td>
+        <td>${r.totalAmount}</td>
+        <td><button class="delete-btn" onclick="del(${r.id})">X</button></td>
+      </tr>`;
+    });
+    loadChartFromTable();
   });
 }
 
-/* UPDATE CHART */
-function updateChart(year){
-  totals.fill(0);
-  rawData.forEach(r=>{
-    const d=new Date(r[0]);
-    if(d.getFullYear()===year){
-      totals[d.getMonth()]+=Number(r[9]);
+// Delete row
+function del(id){ 
+  fetch(scriptURL+"?action=delete&id="+id)
+  .then(()=> loadTable())
+  .catch(err => console.error("Error deleting data: ", err));
+}
+
+// Chart
+function loadChartFromTable(){
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const monthlyData = Array(12).fill(0);
+  const rows = document.querySelectorAll("#tableBody tr");
+
+  rows.forEach(row=>{
+    const dateText = row.children[0].textContent;
+    const totalText = row.children[8].textContent; 
+    if(dateText && totalText){
+      const date = new Date(dateText);
+      if(!isNaN(date.getTime())) monthlyData[date.getMonth()] += Number(totalText)||0;
     }
   });
-  chart.update();
+
+  if(chart) chart.destroy();
+
+  chart = new Chart(document.getElementById("lineChart").getContext("2d"),{
+    type:"line",
+    data:{
+      labels: months,
+      datasets:[{
+        label:"Monthly Investment",
+        data: monthlyData,
+        borderWidth:3,
+        tension:0.35,
+        fill:false,
+        borderColor:"#22c55e",
+        pointBackgroundColor: "#22c55e",
+        pointRadius: 5
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        tooltip:{
+          callbacks:{
+            label: function(context) {
+              const monthIndex = context.dataIndex;
+              let total = 0;
+              let firstDate = "";
+              const rows = document.querySelectorAll("#tableBody tr");
+              rows.forEach(row=>{
+                const date = new Date(row.children[0].textContent);
+                if(date.getMonth() === monthIndex){
+                  total += Number(row.children[8].textContent)||0;
+                  if(!firstDate) firstDate = date.toLocaleDateString('en-GB'); // DD/MM/YYYY
+                }
+              });
+              return firstDate ? `${firstDate} : ₹${total}` : `₹${total}`;
+            }
+          }
+        }
+      },
+      scales:{
+        y:{
+          beginAtZero:true,
+          title:{display:true,text:"Amount (₹)"}
+        },
+        x:{
+          title:{display:true,text:"Month"}
+        }
+      }
+    }
+  });
 }
 
-/* CLEAR INPUTS */
-function clearInputs(){
-  document.getElementById("datetime").value="";
-  ["feed","water","elec","med","doc","trans","export"]
-    .forEach(id=>document.getElementById(id).value="");
-}
+// Add input listeners
+[feed, water, electric, medicine, doctor, maintenance].forEach(el => el.addEventListener('input', calcTotal));
+
+// On load
+window.onload=()=>{ calcTotal(); loadTable(); };
 </script>
-
 </body>
 </html>
