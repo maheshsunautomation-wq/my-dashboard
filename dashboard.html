@@ -175,7 +175,7 @@ canvas#bgCanvas {
 <div class="grid">
   <!-- your links unchanged -->
     <a class="btn" href="ANNA.html" target="_blank">Cattle Weigth Growth Analysis</a>
-  <a class="btn"  id="sensorChartBtn" href="#"  target="_blank">Environmental Safety Sensor Dashboard</a>
+  <a class="btn"  id="sensorChartBtn" href="sensor_chart.html"  target="_blank">Environmental Safety Sensor Dashboard</a>
   <a class="btn" href="temp_chart.html" target="_blank">Environmental Condition Chart</a>
   <a class="btn" href="schedule.html" target="_blank">Medication Schedule Manager</a>
   <a class="btn" href="https://docs.google.com/spreadsheets/d/148uWODaBmh1LNy6v69CaXQCTsLl9UEDSavRTWov3ap8/edit?gid=0#gid=0" target="_blank">Annual Water Requirement Prediction</a>
@@ -238,10 +238,18 @@ toggleBtn.addEventListener('click', () => {
   }
 
 });
+    const sensorChartBtn = document.getElementById("sensorChartBtn");
+sensorChartBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    const activeCall = toggleBtn.classList.contains('disabled') ? 0 : 1;
+    const url = `sensor_chart.html?activeCall=${activeCall}`;
+    window.open(url, '_blank');
+});
    
 </script>
 
 </body>
 </html>
+
 
 
