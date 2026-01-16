@@ -144,6 +144,22 @@ canvas#bgCanvas {
         font-size:18px;
         min-height:140px;
     }
+   .toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    top: auto;
+    right: 50%;
+    transform: translateX(50%) scale(1); /* keep scale stable */
+    padding: 14px 40px;
+    font-size: 16px;
+    z-index: 1000;
+    transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+  }
+
+  .toggle-btn:hover {
+    transform: translateX(50%) scale(1.05);
+  }
+} 
 }
 </style>
 </head>
@@ -203,8 +219,29 @@ function draw(){
  requestAnimationFrame(draw);
 }
 draw();
+ const toggleBtn = document.getElementById('toggleBtn');
+
+// initial state
+toggleBtn.classList.add('disabled');
+toggleBtn.textContent = 'NO ACTIVE CALL';
+
+toggleBtn.addEventListener('click', () => {
+
+  if (toggleBtn.classList.contains('disabled')) {
+    // turn ACTIVE
+    toggleBtn.classList.remove('disabled');
+    toggleBtn.textContent = 'ACTIVE CALL';
+  } else {
+    // turn OFF
+    toggleBtn.classList.add('disabled');
+    toggleBtn.textContent = 'NO ACTIVE CALL';
+  }
+
+});
+   
 </script>
 
 </body>
 </html>
+
 
