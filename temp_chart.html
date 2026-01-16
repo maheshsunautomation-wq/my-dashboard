@@ -1,195 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Pie Chart</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Industrial Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
-  body{
-    background:#000;
-    color:#fff;
-    font-family:Arial, sans-serif;
-    padding:18px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-  }
-  canvas{ background:#111; border-radius:12px; width:100px; max-width:60%; padding:12px; }
-  .controls{ margin-top:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
-  #thresholdBox{ background:#111; padding:12px; border-radius:12px; border:1px solid #333; color:#fff; min-width:360px; }
-  #thresholdBox div{ display:flex; justify-content:space-between; margin:8px 0; }
-  #thresholdBox input{ width:100px; background:#222; color:#fff; padding:6px; border-radius:6px; border:1px solid #666; }
-  #saveBtn{ margin-top:8px; padding:8px 14px; background:#00aaff; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
-  .sensor-option{ background:#111; padding:8px 12px; border-radius:8px; border:1px solid #333; display:inline-flex; gap:8px; align-items:center;}
-  #statusPanel{ background:#111; padding:12px; border-radius:12px; min-width:360px; border:1px solid #333; margin-left:12px; }
-  .status-item{ display:flex; justify-content:space-between; padding:6px; margin:6px 0; border-radius:6px; font-weight:bold; }
-  .status-item.normal{ background:#003300; color:#00ff00; border:2px solid #00ff00; }
-  .status-item.emergency{ background:#330000; color:#ff4444; border:2px solid #ff4444; animation: blink 1s infinite; }
-  @keyframes blink{ 0%{ box-shadow:0 0 6px red } 50%{ box-shadow:0 0 18px red } 100%{ box-shadow:0 0 6px red } }
-  .row{ display:flex; gap:12px; align-items:flex-start; margin-top:14px; flex-wrap:wrap; justify-content:center; }
+/* Body & Background */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #121212;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  min-height: 100vh;
+}
+
+/* Dashboard Container */
+.dashboard {
+  width: 95%;
+  max-width: 1400px;
+  background: #1e1e1e;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+}
+
+/* Header */
+.dashboard h2 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #00ffff;
+  text-shadow: 0 0 10px #00ffff;
+  margin: 0;
+}
+
+.dashboard p {
+  font-size: 16px;
+  color: #ccc;
+  margin: 5px 0 25px 0;
+}
+
+/* Cards */
+.cards {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.card {
+  flex: 1 1 200px;
+  background: linear-gradient(145deg,#1c1c1c,#2c2c2c);
+  border-radius: 15px;
+  padding: 25px 20px;
+  text-align: center;
+  border-left: 4px solid #00ffff;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  transition: 0.3s all;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0,255,255,0.5);
+}
+
+.card h3 {
+  font-size: 28px;
+  margin-bottom: 10px;
+  color: #00ffff;
+}
+
+.card p {
+  font-size: 16px;
+  color: #aaa;
+}
+
+/* Chart Box */
+.chart-box {
+  background: #1a1a1a;
+  border-radius: 20px;
+  padding: 30px;
+  border: 1px solid #333;
+  box-shadow: inset 0 0 15px rgba(0,255,255,0.1);
+}
+
+/* Chart */
+canvas {
+  width: 100% !important;
+  height: 450px !important;
+}
 </style>
 </head>
 <body>
 
-<h2>📊 Pie Chart</h2>
+<div class="dashboard">
+  <h2>Real-time Monitoring • Temperature • Humidity • Water Levels</h2>
+ 
 
-<div class="controls" id="sensorControls"></div>
-<canvas id="sensorChart"></canvas>
+  <div class="cards">
+    <div class="card"><h3 id="tempVal">--</h3><p>Temperature (°C)</p></div>
+    <div class="card"><h3 id="humVal">--</h3><p>Humidity (%)</p></div>
+    <div class="card"><h3 id="water1Val">--</h3><p>Water 1 Level</p></div>
+    <div class="card"><h3 id="water2Val">--</h3><p>Water 2 Level</p></div>
+  </div>
 
-<div class="row">
-  <div id="statusPanel"></div>
-
-  <div id="thresholdBox">
-    <h3 style="margin:0 0 8px 0;">Threshold Values</h3>
+  <div class="chart-box">
+    <canvas id="sensorChart"></canvas>
   </div>
 </div>
 
 <script>
-/* -----------------------
-   CONFIG
------------------------ */
-const apiURL = "https://script.google.com/macros/s/AKfycbyp2ozRqBGEdD6swM7I3xjeTkRgRWFW2VnHZ_Jn4nDw8KgRVYnqfYpOBsID4yPm3bZw/exec";
+const url = "https://script.google.com/macros/s/AKfycbwEDijVULSbBQaJgyOwIsbbT8WB1JvqG0AbJrpBDPDMJfQ-iEHVCI6DXs_J7YLv0b4/exec";
 
-const sensors = ["TEMP","HUMDITY","WATER1","WATER2"];
-let colors = ["#ff4444","#44aaff","#44ff44","#ffa500"];
 
-let thresholds = { TEMP:35, HUMDITY:90, WATER1:40, WATER2:40 };
-const saved = localStorage.getItem("sensorThresholds");
-if(saved) thresholds = JSON.parse(saved);
+let chart;
 
-let parsedData = [];
-let chart = null;
+function loadData() {
+  fetch(url)
+    .then(res => res.json())
+    .then(rows => {
+      let labels = [];
+      let temp = [];
+      let hum = [];
+      let water1 = [];
+      let water2 = [];
 
-/* -----------------------
-   LOAD DATA
------------------------ */
-function loadData(){
-  fetch(apiURL)
-    .then(r=>r.json())
-    .then(sheet=>{
+      rows.forEach(r => {
+        labels.push(`${r.date} ${r.time}`);
+        temp.push(r.temp);
+        hum.push(r.hum);
+        water1.push(r.water1);
+        water2.push(r.water2);
+      });
 
-      parsedData = sheet.map(r => ({
-        DATE: r.DATE,
-        TIME: r.TIME,
-        values: sensors.map(s => Number(r[s] ?? 0))
-      }));
+      if(rows.length>0){
+        const last = rows[rows.length-1];
+        document.getElementById("tempVal").innerText = last.temp;
+        document.getElementById("humVal").innerText = last.hum;
+        document.getElementById("water1Val").innerText = last.water1;
+        document.getElementById("water2Val").innerText = last.water2;
+      }
 
-      const latest = parsedData[parsedData.length-1];
-      const pieValues = latest.values;
-
-      if(chart){
-        chart.data.datasets[0].data = pieValues;
-        chart.update();
-      } else {
-        const ctx = document.getElementById('sensorChart').getContext('2d');
-
-        chart = new Chart(ctx,{
-          type:'pie',
-          data:{
-            labels: sensors,
-            datasets:[{
-              data: pieValues,
-              backgroundColor: colors,
-            }]
+      if (!chart) {
+        chart = new Chart(document.getElementById("sensorChart"), {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              { label:"Temperature", data:temp, borderColor:"#ff8c00", backgroundColor:"rgba(255,140,0,0.2)", borderWidth:3, tension:0.4, pointRadius:5, pointBackgroundColor:"#ff8c00" },
+              { label:"Humidity", data:hum, borderColor:"#1e90ff", backgroundColor:"rgba(30,144,255,0.2)", borderWidth:3, tension:0.4, pointRadius:5, pointBackgroundColor:"#1e90ff" },
+              { label:"Water 1", data:water1, borderColor:"#32cd32", backgroundColor:"rgba(50,205,50,0.2)", borderWidth:3, tension:0.4, pointRadius:5, pointBackgroundColor:"#32cd32" },
+              { label:"Water 2", data:water2, borderColor:"#ff1493", backgroundColor:"rgba(255,20,147,0.2)", borderWidth:3, tension:0.4, pointRadius:5, pointBackgroundColor:"#ff1493" }
+            ]
           },
-          options:{
-            responsive:true,
-            animation:{ duration:1200, easing:'easeOutQuart' },
-            plugins:{
-              legend:{
-                labels:{ color:'#fff', font:{size:16, weight:'bold'} }
-              },
-              tooltip:{
-                backgroundColor:'rgba(0,0,0,0.85)',
-                titleFont:{ size:16, weight:'bold' },
-                bodyFont:{ size:14 },
-                padding:12,
-                cornerRadius:10
-              }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'nearest', intersect: false },
+            scales: {
+              x: { ticks: { color:"#fff" }, grid: { color:"rgba(255,255,255,0.05)" } },
+              y: { beginAtZero: true, ticks: { color:"#fff" }, grid: { color:"rgba(255,255,255,0.05)" } }
+            },
+            plugins: {
+              legend: { labels: { color:"#fff", boxWidth:14, font:{size:14} } },
+              tooltip: { backgroundColor: '#111', titleColor:'#ff8c00', bodyColor:'#fff', borderColor:'#ff8c00', borderWidth:1 }
             }
           }
         });
+      } else {
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = temp;
+        chart.data.datasets[1].data = hum;
+        chart.data.datasets[2].data = water1;
+        chart.data.datasets[3].data = water2;
+        chart.update();
       }
-
-      updateStatus();
-    })
+    });
 }
 
-/* -----------------------
-   STATUS PANEL
------------------------ */
-function updateStatus(){
-  const panel=document.getElementById('statusPanel');
-  panel.innerHTML='<h3>Status</h3>';
-
-  sensors.forEach((s,i)=>{
-    const latestValue = parsedData[parsedData.length-1].values[i];
-
-    const div=document.createElement('div');
-    div.className='status-item';
-
-    if(latestValue > thresholds[s]){
-      div.classList.add('emergency');
-      div.innerHTML=`<span>${s}</span><span>🚨 ${latestValue}</span>`;
-    } else {
-      div.classList.add('normal');
-      div.innerHTML=`<span>${s}</span><span>✔ ${latestValue}</span>`;
-    }
-    panel.appendChild(div);
-  });
-}
-
-/* -----------------------
-   CONTROLS
------------------------ */
-(function(){
-  const control=document.getElementById('sensorControls');
-
-  sensors.forEach((s,i)=>{
-    const box=document.createElement('div');
-    box.className='sensor-option';
-
-    const lbl=document.createElement('label');
-    lbl.textContent=s;
-
-    const col=document.createElement('input');
-    col.type='color';
-    col.value=colors[i];
-    col.oninput=()=>{ colors[i]=col.value; chart.data.datasets[0].backgroundColor=colors; chart.update(); };
-
-    box.appendChild(lbl);
-    box.appendChild(col);
-    control.appendChild(box);
-  });
-
-  const box=document.getElementById('thresholdBox');
-  sensors.forEach(s=>{
-    const row=document.createElement('div');
-    row.innerHTML=`<span>${s}</span>`;
-    const input=document.createElement('input');
-    input.type='number';
-    input.value=thresholds[s];
-    input.oninput=()=>{ thresholds[s]=Number(input.value); updateStatus(); };
-    row.appendChild(input);
-    box.appendChild(row);
-  });
-
-  const save=document.createElement('button');
-  save.id='saveBtn';
-  save.textContent='SAVE';
-  save.onclick=()=>{ localStorage.setItem("sensorThresholds",JSON.stringify(thresholds)); alert("Saved!"); };
-  box.appendChild(save);
-})();
-
-/* -----------------------
-   AUTO REFRESH
------------------------ */
 loadData();
-setInterval(loadData,5000);
-
+setInterval(loadData, 10000);
 </script>
+
 </body>
 </html>
