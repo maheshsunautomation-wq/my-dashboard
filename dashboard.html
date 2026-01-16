@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=1400, initial-scale=0.3, maximum-scale=1.0, user-scalable=yes">
+
+<!-- ✅ FORCE DESKTOP VIEW ON MOBILE -->
+<meta name="viewport" content="width=1400, initial-scale=0.35, maximum-scale=1.0, user-scalable=yes">
 
 <title>Premium Dashboard - Multi-Color Particle Glow</title>
 
@@ -11,10 +13,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <style>
-    @media (max-width: 768px) {
-    body {
-        min-width: 1400px;
-    }
 body {
     margin:0;
     padding:0;
@@ -38,11 +36,11 @@ canvas#bgCanvas {
     z-index:-1;
 }
 
-/* Centered Top Text - Luxury Gold */
+/* Centered Top Text */
 .topbar {
-    position: relative; /* changed from absolute */
-    margin-top: 40px;   /* space from top */
-    margin-bottom: 70px; /* space before grids */
+    position: relative;
+    margin-top: 40px;
+    margin-bottom: 70px;
     text-align: center;
     font-size: 60px;
     font-weight: bold;
@@ -77,43 +75,31 @@ canvas#bgCanvas {
 
 /* Grid Layout */
 .grid {
-     display:grid;
+    display:grid;
     grid-template-columns:repeat(3,260px);
-    grid-auto-rows:auto;
     gap:30px;
     z-index:10;
     justify-content:center;
 }
 
-/* Extra Grid Layout */
-
-
-/* Premium Buttons */
+/* Buttons */
 .btn {
     display:flex;
     justify-content:center;
     align-items:center;
     text-align:center;
-
-    font-size:22px;          /* unchanged */
+    font-size:22px;
     font-weight:bold;
     color:#fff;
-
-    padding:22px 18px;       /* increased padding */
-    min-height:170px;        /* more box height */
-    line-height:1.4;         /* text breathing space */
-    text-decoration: none;   /* ✅ UNDERLINE REMOVED */
-
-
+    padding:22px 18px;
+    min-height:170px;
+    line-height:1.4;
+    text-decoration:none;
     border-radius:20px;
     position:relative;
     overflow:hidden;
-    background:linear-gradient(145deg,#1e2a38,#111820);
-    box-shadow:6px 6px 16px #0a0f14,-6px -6px 16px #2a3c4e;
     transition:0.3s;
 }
-
-
 
 .btn::before {
     content:"";
@@ -126,7 +112,6 @@ canvas#bgCanvas {
     -webkit-mask-composite:xor;
     mask-composite:exclude;
     opacity:0;
-    transition:0.3s;
 }
 .btn::after {
     content:"";
@@ -141,37 +126,46 @@ canvas#bgCanvas {
 }
 .btn:hover {
     transform:translateY(-8px);
-    box-shadow:8px 8px 20px #0a0f14,-8px -8px 20px #2a3c4e;
 }
 .btn:hover::before { opacity:1; }
 .btn:hover::after { left:120%; }
 
-/* Original 3x3 Grid Button Colors */
-.grid a:nth-child(1){ background:linear-gradient(145deg,#ef0418e1,#05e2daf2);}
-.grid a:nth-child(2){ background:linear-gradient(145deg,#f60505,#0625f0f7);}
-.grid a:nth-child(3){ background:linear-gradient(145deg,#bd4bffb9,#ed0404da);}
-.grid a:nth-child(4){ background:linear-gradient(145deg,#04f052da,#06cf14f6);}
-.grid a:nth-child(5){ background:linear-gradient(145deg,#fac370b4,#fe4040ee);}
-.grid a:nth-child(6){ background:linear-gradient(145deg,#1305d9,#fbc2eb);}
-.grid a:nth-child(7){ background:linear-gradient(145deg,#ff2fc4,#efe305fc);}
-.grid a:nth-child(8){ background:linear-gradient(145deg,#ff0000de,#00ffcce8);}
-.grid a:nth-child(9){ background:linear-gradient(145deg,#f71e1e93,#ffd200);}
-.grid a:nth-child(10){ background:linear-gradient(to right,#FF7E5F,#8c8cffad);}
-.grid a:nth-child(11){ background:linear-gradient(to right,#00C6FF,#ff0037d6);}
-.grid a:nth-child(12){ background:linear-gradient(to right,#9D50BB,#4baa48);}
-.grid a:nth-child(13){ background:linear-gradient(to right,#4b43e9,#9f04aa);}
-.grid a:nth-child(14){ background:linear-gradient(to right,#f7971e,#ff0000b4);}
-.grid a:nth-child(15){ background:linear-gradient(to right,#cb072e75,#a199ffc2);}
-.grid a:nth-child(16){ background:linear-gradient(to right,#e20407,#d3ef04ee);}
-.grid a:nth-child(17){ background:linear-gradient(to right,#02f6ee,#1401e2f2);}
-.grid a:nth-child(18){ background:linear-gradient(to right,#1df401,#ed04aff3);}
-.grid a:nth-child(19){ background:linear-gradient(to right,#027213,#fe0303f3);}
-.grid a:nth-child(20){ background:linear-gradient(to right,#11e3e784,#f70606f3);}
-.grid a:nth-child(21){ background:linear-gradient(to right,#e7831184,#06f76ef3);}
-.grid a:nth-child(22){ background:linear-gradient(to right,#5305f0,#ee0332);}
-.grid a:nth-child(23){ background:linear-gradient(to right,#0323f5,#f9ae00);}
-.grid a:nth-child(24){ background:linear-gradient(to right,#ff0404,#28f504);}
+/* Button Colors */
+.grid a:nth-child(1){background:linear-gradient(145deg,#ef0418e1,#05e2daf2);}
+.grid a:nth-child(2){background:linear-gradient(145deg,#f60505,#0625f0f7);}
+.grid a:nth-child(3){background:linear-gradient(145deg,#bd4bffb9,#ed0404da);}
+.grid a:nth-child(4){background:linear-gradient(145deg,#04f052da,#06cf14f6);}
+.grid a:nth-child(5){background:linear-gradient(145deg,#fac370b4,#fe4040ee);}
+.grid a:nth-child(6){background:linear-gradient(145deg,#1305d9,#fbc2eb);}
+.grid a:nth-child(7){background:linear-gradient(145deg,#ff2fc4,#efe305fc);}
+.grid a:nth-child(8){background:linear-gradient(145deg,#ff0000de,#00ffcce8);}
+.grid a:nth-child(9){background:linear-gradient(145deg,#f71e1e93,#ffd200);}
+.grid a:nth-child(10){background:linear-gradient(to right,#FF7E5F,#8c8cffad);}
+.grid a:nth-child(11){background:linear-gradient(to right,#00C6FF,#ff0037d6);}
+.grid a:nth-child(12){background:linear-gradient(to right,#9D50BB,#4baa48);}
+.grid a:nth-child(13){background:linear-gradient(to right,#4b43e9,#9f04aa);}
+.grid a:nth-child(14){background:linear-gradient(to right,#f7971e,#ff0000b4);}
+.grid a:nth-child(15){background:linear-gradient(to right,#cb072e75,#a199ffc2);}
+.grid a:nth-child(16){background:linear-gradient(to right,#e20407,#d3ef04ee);}
+.grid a:nth-child(17){background:linear-gradient(to right,#02f6ee,#1401e2f2);}
+.grid a:nth-child(18){background:linear-gradient(to right,#1df401,#ed04aff3);}
+.grid a:nth-child(19){background:linear-gradient(to right,#027213,#fe0303f3);}
+.grid a:nth-child(20){background:linear-gradient(to right,#11e3e784,#f70606f3);}
+.grid a:nth-child(21){background:linear-gradient(to right,#e7831184,#06f76ef3);}
+.grid a:nth-child(22){background:linear-gradient(to right,#5305f0,#ee0332);}
+.grid a:nth-child(23){background:linear-gradient(to right,#0323f5,#f9ae00);}
+.grid a:nth-child(24){background:linear-gradient(to right,#ff0404,#28f504);}
 
+/* ✅ FORCE DESKTOP VIEW ON MOBILE */
+@media (max-width: 768px) {
+    html, body {
+        width: 1400px;
+        min-width: 1400px;
+    }
+    body {
+        overflow-x: auto;
+    }
+}
 </style>
 </head>
 
@@ -303,3 +297,4 @@ window.addEventListener('resize', ()=>{
 
 </body>
 </html>
+
